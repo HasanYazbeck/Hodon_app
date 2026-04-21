@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Hodon brand splash background — lavender/purple primary (light mode) -->
+    <color name="splash_background">#F5F0FF</color>
+    <!-- Dark mode splash background -->
+    <color name="splash_background_dark">#1A1025</color>
+</resources>
