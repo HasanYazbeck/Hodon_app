@@ -122,7 +122,7 @@ class _MyReviewsScreenState extends ConsumerState<MyReviewsScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<_ReviewsDateFilter>(
-                    value: _dateFilter,
+                    initialValue: _dateFilter,
                     decoration: InputDecoration(
                       labelText: 'Date',
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
