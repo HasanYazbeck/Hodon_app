@@ -12,6 +12,17 @@ const Map<ServiceType, String> _serviceAgeRanges = {
   ServiceType.childhoodEducation: 'Ages 3-10',
 };
 
+const Map<ServiceType, String> _serviceDescriptions = {
+  ServiceType.babysitting:
+      'Short-term childcare for a few hours, usually evenings or specific occasions. Best for flexible, ad-hoc support.',
+  ServiceType.fullTimeNanny:
+      'Consistent daily childcare with routine support (meals, school prep, naps, activities). Best for families needing ongoing coverage.',
+  ServiceType.newbornInfantCare:
+      'Specialized care for newborns and infants, including feeding schedules, soothing, sleep routines, and hygiene support.',
+  ServiceType.childhoodEducation:
+      'Learning-focused support through structured play, early literacy/numeracy, and age-appropriate educational activities.',
+};
+
 class RatesServicesScreen extends ConsumerStatefulWidget {
   const RatesServicesScreen({super.key});
 
@@ -172,6 +183,38 @@ class _ServiceRateCard extends StatelessWidget {
     required this.onToggle,
   });
 
+  void _showServiceInfo(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(serviceType.label),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _serviceDescriptions[serviceType] ?? 'Service details are not available.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppSizes.sm),
+            Text(
+              'Recommended ${_serviceAgeRanges[serviceType] ?? 'All ages'}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return HodonCard(
@@ -184,9 +227,21 @@ class _ServiceRateCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      serviceType.label,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            serviceType.label,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => _showServiceInfo(context),
+                          icon: const Icon(Icons.info_outline_rounded, size: 18),
+                          tooltip: 'Service info',
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
