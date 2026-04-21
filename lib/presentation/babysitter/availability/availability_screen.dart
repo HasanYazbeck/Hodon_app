@@ -5,193 +5,213 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
-const List<String> _timeSlots = [
-  '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM',
-  '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM',
-  '6 PM', '7 PM', '8 PM', '9 PM'
-];
-
-/// Provider to track which days are expanded in the UI
-final _expandedDaysProvider = StateProvider<Map<String, bool>>((ref) {
-  return {
-    'Monday': false,
-    'Tuesday': false,
-    'Wednesday': false,
-    'Thursday': false,
-    'Friday': false,
-    'Saturday': false,
-    'Sunday': false,
-  };
-});
-
-class AvailabilityScreen extends ConsumerWidget {
+class AvailabilityScreen extends ConsumerStatefulWidget {
   const AvailabilityScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final availability = ref.watch(sitterAvailabilityProvider);
-    final expandedDays = ref.watch(_expandedDaysProvider);
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Availability')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.pageHorizontal),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: AppSizes.md),
-            Text(
-              'Set Your Schedule',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: AppSizes.sm),
-            Text(
-              'Select which times you\'re available each day.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-            const SizedBox(height: AppSizes.xl),
-            ...availability.daySlots.keys.map((day) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: AppSizes.sm),
-                child: _DayTimeSlotCard(
-                  day: day,
-                  isExpanded: expandedDays[day] ?? false,
-                  selectedSlots: availability.daySlots[day] ?? {},
-                  onExpandToggle: (expanded) {
-                    ref.read(_expandedDaysProvider.notifier).update((state) {
-                      final updated = Map<String, bool>.from(state);
-                      updated[day] = expanded;
-                      return updated;
-                    });
-                  },
-                  onSlotToggle: (slot) {
-                    ref.read(sitterAvailabilityProvider.notifier).toggleSlot(day, slot);
-                  },
-                ),
-              );
-            }),
-            const SizedBox(height: AppSizes.xl),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  await ref.read(sitterAvailabilityProvider.notifier).saveAvailability();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Availability saved successfully.'),
-                        backgroundColor: AppColors.success,
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error saving availability: $e'),
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-                ),
-              ),
-              child: const Text('Save Availability'),
-            ),
-             const SizedBox(height: AppSizes.xxl),
-           ],
-         ),
-       ),
-     );
-  }
+  ConsumerState<AvailabilityScreen> createState() => _AvailabilityScreenState();
 }
 
-class _DayTimeSlotCard extends StatelessWidget {
-  final String day;
-  final bool isExpanded;
-  final Set<String> selectedSlots;
-  final Function(bool) onExpandToggle;
-  final Function(String) onSlotToggle;
+class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
+  static const List<String> _days = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
 
-  const _DayTimeSlotCard({
-    required this.day,
-    required this.isExpanded,
-    required this.selectedSlots,
-    required this.onExpandToggle,
-    required this.onSlotToggle,
-  });
+  late final List<String> _hourSlots;
+  String _selectedDay = 'Monday';
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hourSlots = List.generate(24, (h) {
+      final suffix = h >= 12 ? 'PM' : 'AM';
+      final hour = h % 12 == 0 ? 12 : h % 12;
+      return '$hour $suffix';
+    });
+  }
+
+  Future<void> _saveAvailability() async {
+    setState(() => _isSaving = true);
+    try {
+      await ref.read(sitterAvailabilityProvider.notifier).saveAvailability();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Availability saved successfully.'),
+            backgroundColor: AppColors.success,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save availability: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return HodonCard(
-      onTap: () => onExpandToggle(!isExpanded),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final availability = ref.watch(sitterAvailabilityProvider);
+    final selectedSlots = availability.daySlots[_selectedDay] ?? <String>{};
+    final totalHours = availability.daySlots.values.fold<int>(
+      0,
+      (sum, slots) => sum + slots.length,
+    );
+    final activeDays = availability.daySlots.values.where((slots) => slots.isNotEmpty).length;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Availability')),
+      body: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(day, style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        )),
-                    const SizedBox(height: 4),
-                    Text(
-                      selectedSlots.isEmpty
-                          ? 'Not available'
-                          : '${selectedSlots.length} slot${selectedSlots.length != 1 ? 's' : ''} selected',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: selectedSlots.isEmpty
-                                ? AppColors.textSecondary
-                                : AppColors.success,
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.pageHorizontal,
+                AppSizes.md,
+                AppSizes.pageHorizontal,
+                AppSizes.xl,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Set Your Schedule', style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: AppSizes.sm),
+                  Text(
+                    'Choose any hour in each day to define when you can take bookings.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  HodonCard(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Week Summary', style: Theme.of(context).textTheme.titleSmall),
+                              const SizedBox(height: 4),
+                              Text(
+                                '$activeDays active day${activeDays == 1 ? '' : 's'} - $totalHours total hour${totalHours == 1 ? '' : 's'}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                            ],
                           ),
+                        ),
+                        StatusChip(
+                          label: totalHours == 0 ? 'Offline' : 'Available',
+                          color: totalHours == 0 ? AppColors.textHint : AppColors.success,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  Wrap(
+                    spacing: AppSizes.sm,
+                    runSpacing: AppSizes.sm,
+                    children: _days.map((day) {
+                      final selected = day == _selectedDay;
+                      final slotCount = availability.daySlots[day]?.length ?? 0;
+                      return ChoiceChip(
+                        label: Text('${day.substring(0, 3)} ($slotCount)'),
+                        selected: selected,
+                        onSelected: (_) => setState(() => _selectedDay = day),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  Row(
+                    children: [
+                      Text(_selectedDay, style: Theme.of(context).textTheme.titleMedium),
+                      const Spacer(),
+                      TextButton.icon(
+                        onPressed: () => ref
+                            .read(sitterAvailabilityProvider.notifier)
+                            .setDaySlots(_selectedDay, _hourSlots.toSet()),
+                        icon: const Icon(Icons.done_all_rounded, size: 18),
+                        label: const Text('Select All'),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => ref
+                            .read(sitterAvailabilityProvider.notifier)
+                            .setDaySlots(_selectedDay, <String>{}),
+                        icon: const Icon(Icons.clear_all_rounded, size: 18),
+                        label: const Text('Clear'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  Wrap(
+                    spacing: AppSizes.sm,
+                    runSpacing: AppSizes.sm,
+                    children: _hourSlots.map((hour) {
+                      final selected = selectedSlots.contains(hour);
+                      return FilterChip(
+                        label: Text(hour),
+                        selected: selected,
+                        onSelected: (_) => ref
+                            .read(sitterAvailabilityProvider.notifier)
+                            .toggleSlot(_selectedDay, hour),
+                        selectedColor: AppColors.primaryContainer,
+                        checkmarkColor: AppColors.primary,
+                        side: BorderSide(
+                          color: selected ? AppColors.primary : AppColors.border,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
-              Icon(
-                isExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                color: AppColors.textSecondary,
-              ),
-            ],
+            ),
           ),
-          if (isExpanded) ...[
-            const SizedBox(height: AppSizes.md),
-            Divider(height: 1, color: AppColors.border),
-            const SizedBox(height: AppSizes.md),
-            ..._timeSlots.map((slot) {
-              final isSelected = selectedSlots.contains(slot);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: AppSizes.sm),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: isSelected,
-                      onChanged: (value) => onSlotToggle(slot),
-                      fillColor: WidgetStatePropertyAll(
-                        isSelected ? AppColors.primary : AppColors.border,
-                      ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.pageHorizontal,
+                AppSizes.sm,
+                AppSizes.pageHorizontal,
+                AppSizes.md,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isSaving ? null : _saveAvailability,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                     ),
-                    Expanded(
-                      child: Text(
-                        slot,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                  ],
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Save Availability'),
                 ),
-              );
-            }),
-          ],
+              ),
+            ),
+          ),
         ],
       ),
     );
