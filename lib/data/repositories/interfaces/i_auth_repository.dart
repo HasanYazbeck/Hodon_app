@@ -1,4 +1,5 @@
 import '../../../domain/models/user.dart';
+import '../../../domain/enums/app_enums.dart';
 import '../../../domain/enums/user_role.dart';
 
 abstract class IAuthRepository {
@@ -28,6 +29,15 @@ abstract class IAuthRepository {
   Future<bool> isLoggedIn();
 
   Future<void> setUserRole(UserRole role);
+
+  Future<AppUser> updateCurrentUserProfile({
+    String? avatarUrl,
+    String? bio,
+    DateTime? dateOfBirth,
+    Gender? gender,
+    UserAddress? address,
+    bool markProfileComplete = false,
+  });
 }
 
 class AuthResult {

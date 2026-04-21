@@ -20,7 +20,16 @@ import '../../presentation/parent/trust_circle/trust_circle_screen.dart';
 import '../../presentation/parent/profile/parent_profile_screen.dart';
 import '../../presentation/babysitter/home/babysitter_home_screen.dart';
 import '../../presentation/babysitter/bookings/sitter_bookings_screen.dart';
+import '../../presentation/babysitter/bookings/booking_request_screen.dart';
 import '../../presentation/babysitter/profile/sitter_profile_screen.dart';
+import '../../presentation/babysitter/verification/verification_center_screen.dart';
+import '../../presentation/babysitter/verification/id_verification_screen.dart';
+import '../../presentation/babysitter/verification/selfie_verification_screen.dart';
+import '../../presentation/babysitter/verification/background_check_screen.dart';
+import '../../presentation/babysitter/verification/cpr_certification_screen.dart';
+import '../../presentation/babysitter/verification/first_aid_certificate_screen.dart';
+import '../../presentation/babysitter/availability/availability_screen.dart';
+import '../../presentation/babysitter/rates_services/rates_services_screen.dart';
 import '../../presentation/babysitter/earnings/earnings_screen.dart';
 import '../../presentation/shared/chat/chat_list_screen.dart';
 import '../../presentation/shared/notifications/notifications_screen.dart';
@@ -102,7 +111,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Parent shell
       ShellRoute(
-        builder: (context, state, child) => ParentShell(child: child),
+        builder: (context, state, child) => ParentShell(state: state, child: child),
         routes: [
           GoRoute(path: '/parent/home', builder: (_, __) => const ParentHomeScreen()),
           GoRoute(path: '/parent/search', builder: (_, __) => const SearchScreen()),
@@ -144,7 +153,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Babysitter shell
       ShellRoute(
-        builder: (context, state, child) => SitterShell(child: child),
+        builder: (context, state, child) => SitterShell(state: state, child: child),
         routes: [
           GoRoute(path: '/babysitter/home', builder: (_, __) => const BabysitterHomeScreen()),
           GoRoute(path: '/babysitter/bookings', builder: (_, __) => const SitterBookingsScreen()),
@@ -155,6 +164,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(path: '/babysitter/profile', builder: (_, __) => const SitterProfileScreen()),
+          GoRoute(path: '/babysitter/verification', builder: (_, __) => const VerificationCenterScreen()),
+          GoRoute(path: '/babysitter/verification/id', builder: (_, __) => const IdVerificationScreen()),
+          GoRoute(path: '/babysitter/verification/selfie', builder: (_, __) => const SelfieVerificationScreen()),
+          GoRoute(path: '/babysitter/verification/background-check', builder: (_, __) => const BackgroundCheckScreen()),
+          GoRoute(path: '/babysitter/verification/cpr', builder: (_, __) => const CprCertificationScreen()),
+          GoRoute(path: '/babysitter/verification/first-aid', builder: (_, __) => const FirstAidCertificateScreen()),
+          GoRoute(path: '/babysitter/availability', builder: (_, __) => const AvailabilityScreen()),
+          GoRoute(path: '/babysitter/rates-services', builder: (_, __) => const RatesServicesScreen()),
+          GoRoute(path: '/babysitter/edit-profile', builder: (_, __) => const ProfileSetupScreen()),
           GoRoute(path: '/babysitter/onboarding', builder: (_, __) => const SitterOnboardingScreen()),
           GoRoute(path: '/babysitter/earnings', builder: (_, __) => const EarningsScreen()),
           GoRoute(path: '/babysitter/chat', builder: (_, __) => const ChatListScreen()),
@@ -172,12 +190,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 // ── Shell scaffolds with bottom navigation ──────────────────────────────────
 
 class ParentShell extends StatelessWidget {
+  final GoRouterState state;
   final Widget child;
-  const ParentShell({super.key, required this.child});
+  const ParentShell({super.key, required this.state, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return _AppShell(
+      state: state,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: 'Search'),
@@ -198,12 +218,14 @@ class ParentShell extends StatelessWidget {
 }
 
 class SitterShell extends StatelessWidget {
+  final GoRouterState state;
   final Widget child;
-  const SitterShell({super.key, required this.child});
+  const SitterShell({super.key, required this.state, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return _AppShell(
+      state: state,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.work_rounded), label: 'Jobs'),
@@ -224,18 +246,20 @@ class SitterShell extends StatelessWidget {
 }
 
 class _AppShell extends StatelessWidget {
+  final GoRouterState state;
   final Widget child;
   final List<BottomNavigationBarItem> items;
   final List<String> routes;
 
   const _AppShell({
+    required this.state,
     required this.child,
     required this.items,
     required this.routes,
   });
 
-  int _currentIndex(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
+  int _currentIndex() {
+    final location = state.matchedLocation;
     for (int i = 0; i < routes.length; i++) {
       if (location.startsWith(routes[i])) return i;
     }
@@ -247,7 +271,7 @@ class _AppShell extends StatelessWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex(context),
+        currentIndex: _currentIndex(),
         onTap: (i) => context.go(routes[i]),
         items: items,
       ),

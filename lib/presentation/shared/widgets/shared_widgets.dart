@@ -1,4 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/constants/app_colors.dart';
@@ -26,7 +28,15 @@ class UserAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget avatar;
 
-    if (imageUrl != null && imageUrl!.isNotEmpty) {
+    if (_isDataImageUri(imageUrl)) {
+      final bytes = _decodeDataImageUri(imageUrl!);
+      avatar = bytes != null
+          ? CircleAvatar(
+              radius: size / 2,
+              backgroundImage: MemoryImage(bytes),
+            )
+          : _fallbackAvatar();
+    } else if (imageUrl != null && imageUrl!.isNotEmpty) {
       avatar = CachedNetworkImage(
         imageUrl: imageUrl!,
         imageBuilder: (ctx, imageProvider) => CircleAvatar(
@@ -59,6 +69,19 @@ class UserAvatar extends StatelessWidget {
       return GestureDetector(onTap: onTap, child: avatar);
     }
     return avatar;
+  }
+
+  bool _isDataImageUri(String? value) =>
+      value != null && value.startsWith('data:image') && value.contains(',');
+
+  Uint8List? _decodeDataImageUri(String value) {
+    final comma = value.indexOf(',');
+    if (comma < 0 || comma == value.length - 1) return null;
+    try {
+      return base64Decode(value.substring(comma + 1));
+    } catch (_) {
+      return null;
+    }
   }
 
   Widget _fallbackAvatar() {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +10,7 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../domain/enums/app_enums.dart';
 import '../../../domain/enums/user_role.dart';
+import '../../../domain/models/user.dart';
 import '../shared/widgets/app_button.dart';
 import '../shared/widgets/app_text_field.dart';
 
@@ -23,11 +26,23 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   int _currentPage = 0;
 
   // Form fields
-  String? _avatarPath;
+  Uint8List? _avatarBytes;
   final _bioCtrl = TextEditingController();
   final _locationCtrl = TextEditingController();
   DateTime? _dob;
   Gender? _gender;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = ref.read(currentUserProvider);
+    _bioCtrl.text = user?.bio ?? '';
+    _locationCtrl.text = user?.address?.fullAddress ?? '';
+    _dob = user?.dateOfBirth;
+    _gender = user?.gender;
+    _avatarBytes = _decodeAvatarDataUri(user?.avatarUrl);
+  }
 
   @override
   void dispose() {
@@ -40,7 +55,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   Future<void> _pickAvatar() async {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
-    if (image != null) setState(() => _avatarPath = image.path);
+    if (image == null) return;
+    final bytes = await image.readAsBytes();
+    if (!mounted) return;
+    setState(() => _avatarBytes = bytes);
   }
 
   void _nextPage() {
@@ -55,13 +73,58 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     }
   }
 
-  void _finish() {
+  Future<void> _finish() async {
     final user = ref.read(currentUserProvider);
     if (user == null) return;
+
+    setState(() => _isSaving = true);
+    final avatarDataUri = _avatarBytes != null
+        ? 'data:image/jpeg;base64,${base64Encode(_avatarBytes!)}'
+        : user.avatarUrl;
+    final address = _locationCtrl.text.trim().isEmpty
+        ? user.address
+        : UserAddress(
+            id: user.address?.id ?? 'addr_${user.id}',
+            label: user.address?.label ?? 'Home',
+            fullAddress: _locationCtrl.text.trim(),
+            latitude: user.address?.latitude ?? 0,
+            longitude: user.address?.longitude ?? 0,
+            isDefault: user.address?.isDefault ?? true,
+          );
+
+    final ok = await ref.read(authProvider.notifier).updateProfile(
+          avatarUrl: avatarDataUri,
+          bio: _bioCtrl.text.trim(),
+          dateOfBirth: _dob,
+          gender: _gender,
+          address: address,
+          markProfileComplete: true,
+        );
+
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save profile. Please try again.')),
+      );
+      return;
+    }
+
     if (user.role.isParent) {
       context.go('/parent/home');
     } else {
       context.go('/babysitter/home');
+    }
+  }
+
+  Uint8List? _decodeAvatarDataUri(String? value) {
+    if (value == null || !value.startsWith('data:image')) return null;
+    final comma = value.indexOf(',');
+    if (comma < 0 || comma == value.length - 1) return null;
+    try {
+      return base64Decode(value.substring(comma + 1));
+    } catch (_) {
+      return null;
     }
   }
 
@@ -78,9 +141,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   _PhotoPage(
-                    avatarPath: _avatarPath,
+                    avatarBytes: _avatarBytes,
                     onPickAvatar: _pickAvatar,
-                    onNext: _nextPage,
+                    onNext: _isSaving ? null : _nextPage,
                   ),
                   _PersonalInfoPage(
                     bioCtrl: _bioCtrl,
@@ -88,11 +151,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     selectedDob: _dob,
                     onGenderChanged: (g) => setState(() => _gender = g),
                     onDobChanged: (d) => setState(() => _dob = d),
-                    onNext: _nextPage,
+                    onNext: _isSaving ? null : _nextPage,
                   ),
                   _LocationPage(
                     locationCtrl: _locationCtrl,
-                    onNext: _nextPage,
+                    isSaving: _isSaving,
+                    onNext: _isSaving ? null : _nextPage,
                   ),
                 ],
               ),
@@ -123,11 +187,11 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 }
 
 class _PhotoPage extends StatelessWidget {
-  final String? avatarPath;
+  final Uint8List? avatarBytes;
   final VoidCallback onPickAvatar;
-  final VoidCallback onNext;
+  final VoidCallback? onNext;
 
-  const _PhotoPage({this.avatarPath, required this.onPickAvatar, required this.onNext});
+  const _PhotoPage({this.avatarBytes, required this.onPickAvatar, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -154,8 +218,8 @@ class _PhotoPage extends StatelessWidget {
                     color: AppColors.primaryContainer,
                     border: Border.all(color: AppColors.primary, width: 3),
                   ),
-                  child: avatarPath != null
-                      ? ClipOval(child: Image.network(avatarPath!, fit: BoxFit.cover))
+                  child: avatarBytes != null
+                      ? ClipOval(child: Image.memory(avatarBytes!, fit: BoxFit.cover, gaplessPlayback: true))
                       : const Icon(Icons.person_rounded, size: 60, color: AppColors.primary),
                 ),
                 Container(
@@ -167,7 +231,7 @@ class _PhotoPage extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          AppButton(label: avatarPath != null ? AppStrings.next : 'Skip for Now', onPressed: onNext),
+          AppButton(label: avatarBytes != null ? AppStrings.next : 'Skip for Now', onPressed: onNext),
           const SizedBox(height: AppSizes.xl),
         ],
       ),
@@ -181,7 +245,7 @@ class _PersonalInfoPage extends StatelessWidget {
   final DateTime? selectedDob;
   final void Function(Gender) onGenderChanged;
   final void Function(DateTime) onDobChanged;
-  final VoidCallback onNext;
+  final VoidCallback? onNext;
 
   const _PersonalInfoPage({
     required this.bioCtrl,
@@ -239,9 +303,10 @@ class _PersonalInfoPage extends StatelessWidget {
 
 class _LocationPage extends StatelessWidget {
   final TextEditingController locationCtrl;
-  final VoidCallback onNext;
+  final VoidCallback? onNext;
+  final bool isSaving;
 
-  const _LocationPage({required this.locationCtrl, required this.onNext});
+  const _LocationPage({required this.locationCtrl, required this.onNext, this.isSaving = false});
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +337,10 @@ class _LocationPage extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          AppButton(label: "Let's Go! 🎉", onPressed: onNext),
+          AppButton(
+            label: isSaving ? 'Saving...' : "Let's Go! 🎉",
+            onPressed: onNext,
+          ),
           const SizedBox(height: AppSizes.xl),
         ],
       ),

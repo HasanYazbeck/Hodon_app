@@ -5,7 +5,9 @@ import '../../../application/auth/auth_provider.dart';
 import '../../../application/booking/booking_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
+import '../../../domain/enums/app_enums.dart';
 import '../../../domain/enums/booking_status.dart';
+import '../../../domain/models/booking.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
 class BabysitterHomeScreen extends ConsumerWidget {
@@ -73,7 +75,7 @@ class BabysitterHomeScreen extends ConsumerWidget {
                     delegate: SliverChildBuilderDelegate(
                       (_, i) => _RequestCard(
                         booking: pending[i],
-                        onTap: () => context.go('/babysitter/booking-request/${pending[i].id}'),
+                        onTap: () => context.push('/babysitter/booking-request/${pending[i].id}'),
                       ),
                       childCount: pending.length,
                     ),
@@ -118,7 +120,7 @@ class BabysitterHomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildActiveJobCard(BuildContext context, dynamic job) {
+  Widget _buildActiveJobCard(BuildContext context, Booking job) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.pageHorizontal, vertical: AppSizes.sm),
       child: Container(
@@ -147,7 +149,7 @@ class BabysitterHomeScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => context.go('/babysitter/booking-request/${job.id}'),
+                    onPressed: () => context.push('/babysitter/booking-request/${job.id}'),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.primary),
                     child: const Text('View Details'),
                   ),
@@ -205,7 +207,7 @@ class _StatCard extends StatelessWidget {
 }
 
 class _RequestCard extends StatelessWidget {
-  final dynamic booking;
+  final Booking booking;
   final VoidCallback onTap;
 
   const _RequestCard({required this.booking, required this.onTap});

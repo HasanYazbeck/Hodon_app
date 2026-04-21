@@ -1,4 +1,5 @@
 import '../../../domain/models/user.dart';
+import '../../../domain/enums/app_enums.dart';
 import '../../../domain/enums/user_role.dart';
 import '../interfaces/i_auth_repository.dart';
 import '../../../core/storage/secure_storage_service.dart';
@@ -135,11 +136,44 @@ class MockAuthRepository implements IAuthRepository {
     }
   }
 
+  @override
+  Future<AppUser> updateCurrentUserProfile({
+    String? avatarUrl,
+    String? bio,
+    DateTime? dateOfBirth,
+    Gender? gender,
+    UserAddress? address,
+    bool markProfileComplete = false,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final userId = await _storage.getUserId();
+    if (userId == null) throw Exception('User not found');
+
+    final entry = _users.entries.where((e) => e.value.id == userId).firstOrNull;
+    if (entry == null) throw Exception('User not found');
+
+    final updated = entry.value.copyWith(
+      avatarUrl: avatarUrl,
+      bio: bio,
+      dateOfBirth: dateOfBirth,
+      gender: gender,
+      address: address,
+      isProfileComplete: markProfileComplete ? true : entry.value.isProfileComplete,
+    );
+    _users[entry.key] = updated;
+    return _buildUser(updated);
+  }
+
   AppUser _buildUser(_MockUser u) => AppUser(
         id: u.id,
         email: u.email,
         fullName: u.fullName,
         role: u.role,
+        avatarUrl: u.avatarUrl,
+        bio: u.bio,
+        dateOfBirth: u.dateOfBirth,
+        gender: u.gender,
+        address: u.address,
         isEmailVerified: u.isEmailVerified,
         isProfileComplete: u.isProfileComplete,
         createdAt: DateTime(2025, 1, 1),
@@ -153,6 +187,11 @@ class _MockUser {
   final String password;
   final String fullName;
   final UserRole role;
+  final String? avatarUrl;
+  final String? bio;
+  final DateTime? dateOfBirth;
+  final Gender? gender;
+  final UserAddress? address;
   final bool isEmailVerified;
   final bool isProfileComplete;
 
@@ -162,12 +201,22 @@ class _MockUser {
     required this.password,
     required this.fullName,
     required this.role,
+    this.avatarUrl,
+    this.bio,
+    this.dateOfBirth,
+    this.gender,
+    this.address,
     required this.isEmailVerified,
     required this.isProfileComplete,
   });
 
   _MockUser copyWith({
     UserRole? role,
+    String? avatarUrl,
+    String? bio,
+    DateTime? dateOfBirth,
+    Gender? gender,
+    UserAddress? address,
     bool? isEmailVerified,
     bool? isProfileComplete,
   }) =>
@@ -177,6 +226,11 @@ class _MockUser {
         password: password,
         fullName: fullName,
         role: role ?? this.role,
+        avatarUrl: avatarUrl ?? this.avatarUrl,
+        bio: bio ?? this.bio,
+        dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+        gender: gender ?? this.gender,
+        address: address ?? this.address,
         isEmailVerified: isEmailVerified ?? this.isEmailVerified,
         isProfileComplete: isProfileComplete ?? this.isProfileComplete,
       );

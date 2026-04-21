@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/enums/app_enums.dart';
 import '../../domain/models/user.dart';
 import '../../domain/enums/user_role.dart';
 import '../providers.dart';
@@ -115,6 +116,33 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await repo.setUserRole(role);
     final user = await repo.getCurrentUser();
     if (user != null) state = AuthAuthenticated(user);
+  }
+
+  Future<bool> updateProfile({
+    String? avatarUrl,
+    String? bio,
+    DateTime? dateOfBirth,
+    Gender? gender,
+    UserAddress? address,
+    bool markProfileComplete = false,
+  }) async {
+    final prev = state;
+    if (prev is! AuthAuthenticated) return false;
+    try {
+      final updated = await _ref.read(authRepositoryProvider).updateCurrentUserProfile(
+            avatarUrl: avatarUrl,
+            bio: bio,
+            dateOfBirth: dateOfBirth,
+            gender: gender,
+            address: address,
+            markProfileComplete: markProfileComplete,
+          );
+      state = AuthAuthenticated(updated);
+      return true;
+    } catch (_) {
+      state = prev;
+      return false;
+    }
   }
 
   Future<bool> forgotPassword(String email) async {

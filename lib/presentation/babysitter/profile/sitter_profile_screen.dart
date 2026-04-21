@@ -19,7 +19,7 @@ class SitterProfileScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_rounded),
-            onPressed: () {},
+            onPressed: () => context.go('/babysitter/edit-profile'),
           ),
           IconButton(
             icon: const Icon(Icons.settings_rounded),
@@ -68,10 +68,26 @@ class SitterProfileScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   _menuSection(context, 'Profile', [
-                    _MenuItem(icon: Icons.edit_rounded, label: 'Edit Profile', onTap: () {}),
-                    _MenuItem(icon: Icons.shield_rounded, label: 'Verification Center', onTap: () {}),
-                    _MenuItem(icon: Icons.calendar_month_rounded, label: 'Availability', onTap: () {}),
-                    _MenuItem(icon: Icons.attach_money_rounded, label: 'Rates & Services', onTap: () {}),
+                    _MenuItem(
+                      icon: Icons.edit_rounded,
+                      label: 'Edit Profile',
+                      onTap: () => context.go('/babysitter/edit-profile'),
+                    ),
+                      _MenuItem(
+                        icon: Icons.shield_rounded,
+                        label: 'Verification Center',
+                        onTap: () => context.go('/babysitter/verification'),
+                      ),
+                      _MenuItem(
+                        icon: Icons.calendar_month_rounded,
+                        label: 'Availability',
+                        onTap: () => context.go('/babysitter/availability'),
+                      ),
+                      _MenuItem(
+                        icon: Icons.attach_money_rounded,
+                        label: 'Rates & Services',
+                        onTap: () => context.go('/babysitter/rates-services'),
+                      ),
                   ]),
                   const SizedBox(height: AppSizes.md),
                   _menuSection(context, 'Account', [
