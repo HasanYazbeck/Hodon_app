@@ -70,7 +70,11 @@ class ParentProfileScreen extends ConsumerWidget {
                   ]),
                   const SizedBox(height: AppSizes.md),
                   _MenuSection(items: [
-                    _MenuItem(icon: Icons.help_outline_rounded, label: 'Help & Support', onTap: () {}),
+                    _MenuItem(
+                      icon: Icons.help_outline_rounded,
+                      label: 'Help & Support',
+                      onTap: () => context.push('/help-support'),
+                    ),
                     _MenuItem(icon: Icons.privacy_tip_outlined, label: 'Privacy Policy', onTap: () {}),
                     _MenuItem(icon: Icons.description_outlined, label: 'Terms of Service', onTap: () {}),
                   ]),

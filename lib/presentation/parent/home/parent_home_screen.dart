@@ -110,7 +110,7 @@ class ParentHomeScreen extends ConsumerWidget {
             clipBehavior: Clip.none,
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () => context.go('/parent/notifications'),
                 icon: const Icon(Icons.notifications_rounded),
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.surface,

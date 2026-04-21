@@ -113,7 +113,7 @@ class BabysitterHomeScreen extends ConsumerWidget {
                 side: const BorderSide(color: AppColors.border),
               ),
             ),
-            onPressed: () {},
+            onPressed: () => context.go('/babysitter/notifications'),
           ),
         ],
       ),

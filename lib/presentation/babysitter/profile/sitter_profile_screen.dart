@@ -91,9 +91,21 @@ class SitterProfileScreen extends ConsumerWidget {
                   ]),
                   const SizedBox(height: AppSizes.md),
                   _menuSection(context, 'Account', [
-                    _MenuItem(icon: Icons.star_rounded, label: 'My Reviews', onTap: () {}),
-                    _MenuItem(icon: Icons.notifications_rounded, label: 'Notifications', onTap: () {}),
-                    _MenuItem(icon: Icons.help_outline_rounded, label: 'Help & Support', onTap: () {}),
+                    _MenuItem(
+                      icon: Icons.star_rounded,
+                      label: 'My Reviews',
+                      onTap: () => context.go('/babysitter/reviews'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.notifications_rounded,
+                      label: 'Notifications',
+                      onTap: () => context.go('/babysitter/notifications'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.help_outline_rounded,
+                      label: 'Help & Support',
+                      onTap: () => context.push('/help-support'),
+                    ),
                   ]),
                   const SizedBox(height: AppSizes.md),
                   _menuSection(context, '', [

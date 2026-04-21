@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
@@ -21,7 +22,11 @@ class SettingsScreen extends ConsumerWidget {
           ]),
           const SizedBox(height: AppSizes.md),
           _Section(title: 'Support', items: [
-            _SettingsItem(icon: Icons.help_outline_rounded, label: 'Help & Support', onTap: () {}),
+            _SettingsItem(
+              icon: Icons.help_outline_rounded,
+              label: 'Help & Support',
+              onTap: () => context.push('/help-support'),
+            ),
             _SettingsItem(icon: Icons.chat_rounded, label: 'Contact Us', onTap: () {}),
             _SettingsItem(icon: Icons.bug_report_rounded, label: 'Report a Bug', onTap: () {}),
           ]),

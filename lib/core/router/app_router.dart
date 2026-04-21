@@ -28,12 +28,15 @@ import '../../presentation/babysitter/verification/selfie_verification_screen.da
 import '../../presentation/babysitter/verification/background_check_screen.dart';
 import '../../presentation/babysitter/verification/cpr_certification_screen.dart';
 import '../../presentation/babysitter/verification/first_aid_certificate_screen.dart';
+import '../../presentation/babysitter/reviews/my_reviews_screen.dart';
+import '../../presentation/babysitter/notifications/babysitter_notifications_screen.dart';
 import '../../presentation/babysitter/availability/availability_screen.dart';
 import '../../presentation/babysitter/rates_services/rates_services_screen.dart';
 import '../../presentation/babysitter/earnings/earnings_screen.dart';
 import '../../presentation/shared/chat/chat_list_screen.dart';
 import '../../presentation/shared/notifications/notifications_screen.dart';
 import '../../presentation/shared/settings/settings_screen.dart';
+import '../../presentation/shared/support/help_support_screen.dart';
 import '../../presentation/onboarding/profile_setup_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -108,6 +111,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
       GoRoute(path: '/role-selection', builder: (_, __) => const RoleSelectionScreen()),
       GoRoute(path: '/profile-setup', builder: (_, __) => const ProfileSetupScreen()),
+      GoRoute(path: '/help-support', builder: (_, __) => const HelpSupportScreen()),
 
       // Parent shell
       ShellRoute(
@@ -170,13 +174,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/babysitter/verification/background-check', builder: (_, __) => const BackgroundCheckScreen()),
           GoRoute(path: '/babysitter/verification/cpr', builder: (_, __) => const CprCertificationScreen()),
           GoRoute(path: '/babysitter/verification/first-aid', builder: (_, __) => const FirstAidCertificateScreen()),
+          GoRoute(path: '/babysitter/reviews', builder: (_, __) => const MyReviewsScreen()),
           GoRoute(path: '/babysitter/availability', builder: (_, __) => const AvailabilityScreen()),
           GoRoute(path: '/babysitter/rates-services', builder: (_, __) => const RatesServicesScreen()),
           GoRoute(path: '/babysitter/edit-profile', builder: (_, __) => const ProfileSetupScreen()),
           GoRoute(path: '/babysitter/onboarding', builder: (_, __) => const SitterOnboardingScreen()),
           GoRoute(path: '/babysitter/earnings', builder: (_, __) => const EarningsScreen()),
           GoRoute(path: '/babysitter/chat', builder: (_, __) => const ChatListScreen()),
-          GoRoute(path: '/babysitter/notifications', builder: (_, __) => const NotificationsScreen()),
+          GoRoute(path: '/babysitter/notifications', builder: (_, __) => const BabysitterNotificationsScreen()),
           GoRoute(path: '/babysitter/settings', builder: (_, __) => const SettingsScreen()),
         ],
       ),
