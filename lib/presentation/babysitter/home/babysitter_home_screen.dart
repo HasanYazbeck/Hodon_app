@@ -5,6 +5,7 @@ import '../../../application/auth/auth_provider.dart';
 import '../../../application/booking/booking_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
+import '../../../core/utils/communication_service.dart';
 import '../../../domain/enums/app_enums.dart';
 import '../../../domain/enums/booking_status.dart';
 import '../../../domain/models/booking.dart';
@@ -86,6 +87,13 @@ class BabysitterHomeScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'support_fab',
+        backgroundColor: AppColors.primary,
+        onPressed: () => _showQuickSupportOptions(context),
+        tooltip: 'Quick Support',
+        child: const Icon(Icons.help_rounded),
       ),
     );
   }
@@ -267,3 +275,118 @@ class _RequestCard extends StatelessWidget {
   }
 }
 
+  void _showQuickSupportOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXl)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppSizes.md),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.textHint,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: AppSizes.lg),
+            Text(
+              'Get Quick Help',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: AppSizes.md),
+            ListTile(
+              leading: const Icon(Icons.chat_rounded),
+              title: const Text('Chat with Support'),
+              subtitle: const Text('Live messaging'),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/babysitter/chat');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.email_rounded),
+              title: const Text('Send Email'),
+              subtitle: const Text(CommunicationService.supportEmail),
+              onTap: () {
+                Navigator.pop(context);
+                _sendEmailSupport(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.phone_rounded),
+              title: const Text('Call Us'),
+              subtitle: const Text(CommunicationService.supportPhoneDisplay),
+              onTap: () {
+                Navigator.pop(context);
+                _callSupport(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.message_rounded),
+              title: const Text('WhatsApp'),
+              subtitle: const Text('Chat via WhatsApp'),
+              onTap: () {
+                Navigator.pop(context);
+                _whatsappSupport(context);
+              },
+            ),
+            const SizedBox(height: AppSizes.md),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _sendEmailSupport(BuildContext context) async {
+    try {
+      await CommunicationService.sendEmail(
+        toEmail: CommunicationService.supportEmail,
+        subject: 'Hodon Support - Babysitter',
+        body: 'Hi Hodon Support,\n\nI need help with...\n\nThank you!',
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open email: $e')),
+        );
+      }
+    }
+  }
+
+  void _callSupport(BuildContext context) async {
+    try {
+      await CommunicationService.makePhoneCall(CommunicationService.supportPhone);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open phone dialer: $e')),
+        );
+      }
+    }
+  }
+
+  void _whatsappSupport(BuildContext context) async {
+    try {
+      await CommunicationService.openWhatsApp(
+        CommunicationService.supportPhone,
+        message: 'Hi Hodon, I need help with...',
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open WhatsApp: $e')),
+        );
+      }
+    }
+  }

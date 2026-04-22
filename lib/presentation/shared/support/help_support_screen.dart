@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
+import '../../../core/utils/communication_service.dart';
 import '../widgets/shared_widgets.dart';
 
 class HelpSupportScreen extends StatelessWidget {
@@ -55,21 +57,21 @@ class HelpSupportScreen extends StatelessWidget {
               icon: Icons.chat_bubble_rounded,
               title: 'Live Chat',
               subtitle: 'Start a conversation with support',
-              onTap: () => _showComingSoon(context),
+              onTap: () => context.go('/chat'),
             ),
             const SizedBox(height: AppSizes.sm),
             _ActionTile(
               icon: Icons.email_rounded,
               title: 'Email Support',
-              subtitle: 'support@hodon.app',
-              onTap: () => _showComingSoon(context),
+              subtitle: CommunicationService.supportEmail,
+              onTap: () => _handleEmailTap(context),
             ),
             const SizedBox(height: AppSizes.sm),
             _ActionTile(
               icon: Icons.phone_rounded,
               title: 'Call Us',
-              subtitle: '+961 1 234 567',
-              onTap: () => _showComingSoon(context),
+              subtitle: CommunicationService.supportPhoneDisplay,
+              onTap: () => _handleCallTap(context),
             ),
             const SizedBox(height: AppSizes.md),
             Text('Frequently Asked Questions', style: Theme.of(context).textTheme.titleMedium),
@@ -105,10 +107,33 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('This support channel will be enabled soon.')),
-    );
+
+  void _handleEmailTap(BuildContext context) async {
+    try {
+      await CommunicationService.sendEmail(
+        toEmail: CommunicationService.supportEmail,
+        subject: 'Hodon Support Request',
+        body: 'Hi Hodon Support,\n\nI need help with...\n\nThank you!',
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open email client: $e')),
+        );
+      }
+    }
+  }
+
+  void _handleCallTap(BuildContext context) async {
+    try {
+      await CommunicationService.makePhoneCall(CommunicationService.supportPhone);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open phone dialer: $e')),
+        );
+      }
+    }
   }
 }
 
