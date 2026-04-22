@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/enums/app_enums.dart';
 
@@ -56,6 +57,7 @@ class _IdVerificationScreenState extends ConsumerState<IdVerificationScreen> {
   Widget build(BuildContext context) {
     final isApproved = _status == VerificationStatus.approved;
     final isUnderReview = _status == VerificationStatus.underReview;
+    final secondaryTextColor = context.appTextSecondary;
 
     return Scaffold(
       appBar: AppBar(title: const Text('ID Verification')),
@@ -73,7 +75,7 @@ class _IdVerificationScreenState extends ConsumerState<IdVerificationScreen> {
             Text(
               'Upload a clear photo of your government-issued ID (passport, driver\'s license, or national ID).',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: secondaryTextColor,
                   ),
             ),
             const SizedBox(height: AppSizes.xl),
@@ -195,7 +197,7 @@ class _IdVerificationScreenState extends ConsumerState<IdVerificationScreen> {
                           Text(
                             'Tap to select a photo',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: secondaryTextColor,
                                 ),
                           ),
                         ],

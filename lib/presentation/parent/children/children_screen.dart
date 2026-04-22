@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/models/child_profile.dart';
 import '../../../domain/enums/app_enums.dart';
@@ -73,6 +74,9 @@ class _ChildCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+    final hintColor = context.appTextHint;
+
     return HodonCard(
       child: Row(
         children: [
@@ -100,7 +104,7 @@ class _ChildCard extends StatelessWidget {
                 Text(child.name, style: Theme.of(context).textTheme.titleMedium),
                 Text(
                   '${child.ageDisplay} · ${child.ageGroup.label}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryTextColor),
                 ),
                 if (child.allergies != null && child.allergies!.isNotEmpty)
                   Text(
@@ -111,7 +115,7 @@ class _ChildCard extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.edit_rounded, size: 18, color: AppColors.textHint),
+            icon: Icon(Icons.edit_rounded, size: 18, color: hintColor),
             onPressed: () {},
           ),
         ],

@@ -63,11 +63,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String email,
     required String password,
     required String fullName,
+    required UserRole role,
   }) async {
     state = const AuthLoading();
     try {
       final repo = _ref.read(authRepositoryProvider);
-      await repo.register(email: email, password: password, fullName: fullName);
+      await repo.register(email: email, password: password, fullName: fullName, role: role);
       state = AuthOtpRequired(email);
     } catch (e) {
       state = AuthError(e.toString().replaceAll('Exception: ', ''));

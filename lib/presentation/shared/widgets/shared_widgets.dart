@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 
 class UserAvatar extends StatelessWidget {
@@ -123,14 +124,19 @@ class ShimmerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final base = context.isDarkMode ? context.appSurfaceVariant : AppColors.shimmerBase;
+    final highlight = context.isDarkMode
+        ? context.appSurfaceVariant.withValues(alpha: 0.65)
+        : AppColors.shimmerHighlight;
+
     return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBase,
-      highlightColor: AppColors.shimmerHighlight,
+      baseColor: base,
+      highlightColor: highlight,
       child: Container(
         height: height,
         width: width,
         decoration: BoxDecoration(
-          color: AppColors.shimmerBase,
+          color: base,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
       ),
@@ -143,9 +149,14 @@ class ShimmerListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final base = context.isDarkMode ? context.appSurfaceVariant : AppColors.shimmerBase;
+    final highlight = context.isDarkMode
+        ? context.appSurfaceVariant.withValues(alpha: 0.65)
+        : AppColors.shimmerHighlight;
+
     return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBase,
-      highlightColor: AppColors.shimmerHighlight,
+      baseColor: base,
+      highlightColor: highlight,
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSizes.pageHorizontal,
@@ -153,19 +164,19 @@ class ShimmerListTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            CircleAvatar(radius: AppSizes.avatarMd / 2, backgroundColor: AppColors.shimmerBase),
+            CircleAvatar(radius: AppSizes.avatarMd / 2, backgroundColor: base),
             const SizedBox(width: AppSizes.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(height: 14, width: 150, decoration: BoxDecoration(
-                    color: AppColors.shimmerBase,
+                    color: base,
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   )),
                   const SizedBox(height: AppSizes.xs),
                   Container(height: 12, width: 100, decoration: BoxDecoration(
-                    color: AppColors.shimmerBase,
+                    color: base,
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   )),
                 ],
@@ -203,7 +214,7 @@ class StarRating extends StatelessWidget {
             style: TextStyle(
               fontSize: size - 2,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimary,
             ),
           ),
       ],
@@ -259,6 +270,8 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.xl),
@@ -284,7 +297,7 @@ class EmptyState extends StatelessWidget {
               Text(
                 subtitle!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: secondaryTextColor,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -349,8 +362,11 @@ class HodonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+
     return Material(
-      color: color ?? AppColors.surface,
+      color: color ?? surfaceColor,
       borderRadius: BorderRadius.circular(AppSizes.radiusLg),
       child: InkWell(
         onTap: onTap,
@@ -358,7 +374,7 @@ class HodonCard extends StatelessWidget {
         child: Container(
           padding: padding ?? const EdgeInsets.all(AppSizes.md),
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: borderColor),
             borderRadius: BorderRadius.circular(AppSizes.radiusLg),
           ),
           child: child,

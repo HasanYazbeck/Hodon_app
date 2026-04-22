@@ -36,6 +36,7 @@ class MockAuthRepository implements IAuthRepository {
     required String email,
     required String password,
     required String fullName,
+    required UserRole role,
   }) async {
     await Future.delayed(const Duration(milliseconds: 800));
     if (_users.containsKey(email)) {
@@ -47,7 +48,7 @@ class MockAuthRepository implements IAuthRepository {
       email: email,
       password: password,
       fullName: fullName,
-      role: UserRole.parent, // set after role selection
+      role: role,
       isEmailVerified: false,
       isProfileComplete: false,
     );

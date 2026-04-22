@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../domain/enums/user_role.dart';
@@ -33,6 +34,8 @@ class _RoleSelectionScreenState extends ConsumerState<RoleSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -49,7 +52,7 @@ class _RoleSelectionScreenState extends ConsumerState<RoleSelectionScreen> {
               const SizedBox(height: AppSizes.sm),
               Text(
                 AppStrings.roleSelectionSubtitle,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: secondaryTextColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSizes.xxl),
@@ -114,16 +117,21 @@ class _RoleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+    final surfaceVariantColor = context.appSurfaceVariant;
+    final secondaryTextColor = context.appTextSecondary;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(AppSizes.lg),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryContainer : AppColors.surface,
+          color: isSelected ? AppColors.primaryContainer : surfaceColor,
           borderRadius: BorderRadius.circular(AppSizes.radiusXl),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected ? AppColors.primary : borderColor,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -136,7 +144,7 @@ class _RoleCard extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.surfaceVariant,
+                color: isSelected ? AppColors.primary : surfaceVariantColor,
                 borderRadius: BorderRadius.circular(AppSizes.radiusLg),
               ),
               child: Center(child: Text(emoji, style: const TextStyle(fontSize: 30))),
@@ -150,7 +158,7 @@ class _RoleCard extends StatelessWidget {
                   const SizedBox(height: AppSizes.xs),
                   Text(
                     subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryTextColor),
                   ),
                 ],
               ),

@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/validators.dart';
+import '../../../domain/enums/user_role.dart';
 import '../shared/widgets/app_button.dart';
 import '../shared/widgets/app_text_field.dart';
 
@@ -22,6 +24,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
+  UserRole? _selectedRole;
 
   @override
   void dispose() {
@@ -34,10 +37,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a role (Parent or Baby Sitter)'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
     await ref.read(authProvider.notifier).register(
           email: _emailCtrl.text.trim(),
           password: _passwordCtrl.text,
           fullName: _nameCtrl.text.trim(),
+          role: _selectedRole!,
         );
   }
 
@@ -45,6 +58,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(authProvider);
     final isLoading = state is AuthLoading;
+    final secondaryTextColor = context.appTextSecondary;
 
     ref.listen(authProvider, (_, next) {
       if (next is AuthError) {
@@ -76,7 +90,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: AppSizes.xs),
                 Text(
                   AppStrings.registerSubtitle,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: secondaryTextColor),
                 ),
                 const SizedBox(height: AppSizes.xl),
                 AppTextField(
@@ -95,6 +109,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   validator: AppValidators.email,
                 ),
+                const SizedBox(height: AppSizes.md),
+                Text('Account Type', style: Theme.of(context).textTheme.labelMedium),
+                const SizedBox(height: AppSizes.sm),
+                _buildRoleSelector(),
                 const SizedBox(height: AppSizes.md),
                 PasswordField(
                   controller: _passwordCtrl,
@@ -129,7 +147,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   children: [
                     Text(
                       AppStrings.alreadyHaveAccount,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor),
                     ),
                     TextButton(
                       onPressed: () => context.go('/login'),
@@ -143,6 +161,97 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildRoleSelector() {
+    final secondaryTextColor = context.appTextSecondary;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedRole = UserRole.parent),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
+                decoration: BoxDecoration(
+                  color: _selectedRole == UserRole.parent
+                      ? AppColors.primaryContainer
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(AppSizes.radiusMd - 1),
+                    bottomLeft: Radius.circular(AppSizes.radiusMd - 1),
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.family_restroom_rounded,
+                      color: _selectedRole == UserRole.parent
+                          ? AppColors.primary
+                          : secondaryTextColor,
+                      size: 28,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Parent',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: _selectedRole == UserRole.parent
+                                ? AppColors.primary
+                                : secondaryTextColor,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Container(width: 1, color: AppColors.border),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedRole = UserRole.babysitter),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
+                decoration: BoxDecoration(
+                  color: _selectedRole == UserRole.babysitter
+                      ? AppColors.primaryContainer
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(AppSizes.radiusMd - 1),
+                    bottomRight: Radius.circular(AppSizes.radiusMd - 1),
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.child_care_rounded,
+                      color: _selectedRole == UserRole.babysitter
+                          ? AppColors.primary
+                          : secondaryTextColor,
+                      size: 28,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Baby Sitter',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: _selectedRole == UserRole.babysitter
+                                ? AppColors.primary
+                                : secondaryTextColor,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

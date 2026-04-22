@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/enums/app_enums.dart';
 
@@ -57,6 +58,7 @@ class _SelfieVerificationScreenState extends ConsumerState<SelfieVerificationScr
   Widget build(BuildContext context) {
     final isApproved = _status == VerificationStatus.approved;
     final isUnderReview = _status == VerificationStatus.underReview;
+    final secondaryTextColor = context.appTextSecondary;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Selfie Verification')),
@@ -74,7 +76,7 @@ class _SelfieVerificationScreenState extends ConsumerState<SelfieVerificationScr
             Text(
               'Take a selfie of your face to match with your uploaded ID.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: secondaryTextColor,
                   ),
             ),
             const SizedBox(height: AppSizes.xl),
@@ -191,7 +193,7 @@ class _SelfieVerificationScreenState extends ConsumerState<SelfieVerificationScr
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.black54,
+                              color: Colors.black.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                             ),
                             child: const Row(
@@ -220,7 +222,7 @@ class _SelfieVerificationScreenState extends ConsumerState<SelfieVerificationScr
                             child: Container(
                               padding: const EdgeInsets.all(6),
                               decoration: const BoxDecoration(
-                                color: Colors.black54,
+                                color: Colors.black,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.refresh_rounded, size: 18, color: Colors.white),
@@ -251,7 +253,7 @@ class _SelfieVerificationScreenState extends ConsumerState<SelfieVerificationScr
                           Text(
                             'Tap to take a photo',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: secondaryTextColor,
                                 ),
                           ),
                         ],

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 
 enum AppButtonVariant { primary, secondary, outline, ghost, danger }
@@ -43,14 +42,14 @@ class AppButton extends StatelessWidget {
     }
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(ThemeData theme) {
     if (isLoading) {
-      return const SizedBox(
+      return SizedBox(
         width: 20,
         height: 20,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          color: AppColors.white,
+          color: theme.colorScheme.onPrimary,
         ),
       );
     }
@@ -74,21 +73,21 @@ class AppButton extends StatelessWidget {
             TextStyle(fontSize: fontSize ?? 15, fontWeight: FontWeight.w600),
           ),
         ),
-        child: _buildContent(),
+        child: _buildContent(theme),
       );
 
   Widget _buildSecondary(ThemeData theme) => ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryContainer,
-          foregroundColor: AppColors.primary,
+          backgroundColor: theme.colorScheme.primaryContainer,
+          foregroundColor: theme.colorScheme.onPrimaryContainer,
           elevation: 0,
           minimumSize: Size(isFullWidth ? double.infinity : 120, height),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radiusLg),
           ),
         ),
-        child: _buildContent(),
+        child: _buildContent(theme),
       );
 
   Widget _buildOutlined(ThemeData theme) => OutlinedButton(
@@ -120,15 +119,15 @@ class AppButton extends StatelessWidget {
   Widget _buildDanger(ThemeData theme) => ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.error,
-          foregroundColor: AppColors.white,
+          backgroundColor: theme.colorScheme.error,
+          foregroundColor: theme.colorScheme.onError,
           elevation: 0,
           minimumSize: Size(isFullWidth ? double.infinity : 120, height),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radiusLg),
           ),
         ),
-        child: _buildContent(),
+        child: _buildContent(theme),
       );
 }
 

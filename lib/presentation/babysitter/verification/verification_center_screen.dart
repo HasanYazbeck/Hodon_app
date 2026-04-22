@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/enums/app_enums.dart';
 import '../../shared/widgets/shared_widgets.dart';
@@ -25,6 +26,8 @@ class _VerificationCenterScreenState extends ConsumerState<VerificationCenterScr
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Verification Center')),
       body: SingleChildScrollView(
@@ -41,7 +44,7 @@ class _VerificationCenterScreenState extends ConsumerState<VerificationCenterScr
             Text(
               'Complete verification steps to increase your visibility and earn badges that families trust.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: secondaryTextColor,
                   ),
             ),
             const SizedBox(height: AppSizes.xl),
@@ -133,13 +136,16 @@ class _VerificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isApproved = status == VerificationStatus.approved;
     final isUnderReview = status == VerificationStatus.underReview;
+    final hintColor = context.appTextHint;
+    final secondaryTextColor = context.appTextSecondary;
+
     final Color statusColor = locked
-        ? AppColors.textHint
+        ? hintColor
         : isApproved
             ? AppColors.success
             : isUnderReview
                 ? AppColors.warning
-                : AppColors.textHint;
+                : hintColor;
     final statusText = locked ? 'Locked' : status.label;
 
     return Opacity(
@@ -173,7 +179,7 @@ class _VerificationItem extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: locked
                               ? AppColors.warning
-                              : AppColors.textSecondary,
+                              : secondaryTextColor,
                         ),
                   ),
                 ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/enums/app_enums.dart';
 import '../../shared/widgets/shared_widgets.dart';
@@ -81,6 +82,8 @@ class _RatesServicesScreenState extends ConsumerState<RatesServicesScreen> {
   @override
   Widget build(BuildContext context) {
     final enabledCount = _serviceConfigs.values.where((cfg) => cfg.enabled).length;
+    final secondaryTextColor = context.appTextSecondary;
+    final hintColor = context.appTextHint;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Rates & Services')),
@@ -97,7 +100,7 @@ class _RatesServicesScreenState extends ConsumerState<RatesServicesScreen> {
                   const SizedBox(height: AppSizes.sm),
                   Text(
                     'Enable services you provide, then set hourly rate for each enabled service.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor),
                   ),
                   const SizedBox(height: AppSizes.md),
                   HodonCard(
@@ -111,7 +114,7 @@ class _RatesServicesScreenState extends ConsumerState<RatesServicesScreen> {
                         ),
                         StatusChip(
                           label: enabledCount == 0 ? 'Inactive' : 'Active',
-                          color: enabledCount == 0 ? AppColors.textHint : AppColors.success,
+                          color: enabledCount == 0 ? hintColor : AppColors.success,
                         ),
                       ],
                     ),
@@ -217,6 +220,11 @@ class _ServiceRateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+    final surfaceColor = context.appSurface;
+    final surfaceVariantColor = context.appSurfaceVariant;
+    final borderColor = context.appBorder;
+
     return HodonCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,7 +255,7 @@ class _ServiceRateCard extends StatelessWidget {
                     Text(
                       _serviceAgeRanges[serviceType] ?? 'All ages',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: secondaryTextColor,
                           ),
                     ),
                   ],
@@ -264,7 +272,7 @@ class _ServiceRateCard extends StatelessWidget {
           Text(
             enabled ? 'Enabled - set your hourly rate' : 'Disabled - enable to offer this service',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: enabled ? AppColors.success : AppColors.textSecondary,
+                  color: enabled ? AppColors.success : secondaryTextColor,
                 ),
           ),
           const SizedBox(height: AppSizes.sm),
@@ -278,14 +286,14 @@ class _ServiceRateCard extends StatelessWidget {
               labelText: 'Hourly Rate',
               hintText: 'Enter rate',
               filled: true,
-              fillColor: enabled ? AppColors.surface : AppColors.surfaceVariant,
+              fillColor: enabled ? surfaceColor : surfaceVariantColor,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                borderSide: const BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: borderColor),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                borderSide: const BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: borderColor),
               ),
             ),
           ),

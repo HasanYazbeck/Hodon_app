@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/enums/app_enums.dart';
 
@@ -71,6 +72,10 @@ class _BackgroundCheckScreenState extends ConsumerState<BackgroundCheckScreen> {
   Widget build(BuildContext context) {
     final isUnderReview = _status == VerificationStatus.underReview;
     final isApproved = _status == VerificationStatus.approved;
+    final secondaryTextColor = context.appTextSecondary;
+    final surfaceColor = context.appSurface;
+    final surfaceVariantColor = context.appSurfaceVariant;
+    final borderColor = context.appBorder;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Background Check')),
@@ -87,7 +92,7 @@ class _BackgroundCheckScreenState extends ConsumerState<BackgroundCheckScreen> {
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium
-                  ?.copyWith(color: AppColors.textSecondary),
+                  ?.copyWith(color: secondaryTextColor),
             ),
             const SizedBox(height: AppSizes.xl),
             if (isApproved || isUnderReview)
@@ -131,9 +136,9 @@ class _BackgroundCheckScreenState extends ConsumerState<BackgroundCheckScreen> {
             Container(
               padding: const EdgeInsets.all(AppSizes.md),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: surfaceColor,
                 borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: borderColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +150,7 @@ class _BackgroundCheckScreenState extends ConsumerState<BackgroundCheckScreen> {
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
-                        ?.copyWith(color: AppColors.textSecondary),
+                        ?.copyWith(color: secondaryTextColor),
                   ),
                   const SizedBox(height: AppSizes.sm),
                   if (_attachment == null)
@@ -166,9 +171,9 @@ class _BackgroundCheckScreenState extends ConsumerState<BackgroundCheckScreen> {
                     Container(
                       padding: const EdgeInsets.all(AppSizes.sm),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceVariant,
+                        color: surfaceVariantColor,
                         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(color: borderColor),
                       ),
                       child: Row(
                         children: [
@@ -210,9 +215,9 @@ class _BackgroundCheckScreenState extends ConsumerState<BackgroundCheckScreen> {
             Container(
               padding: const EdgeInsets.all(AppSizes.md),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: surfaceColor,
                 borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: borderColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

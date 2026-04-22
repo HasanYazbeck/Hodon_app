@@ -7,6 +7,7 @@ abstract class IAuthRepository {
     required String email,
     required String password,
     required String fullName,
+    required UserRole role,
   });
 
   Future<void> verifyOtp({required String email, required String otp});

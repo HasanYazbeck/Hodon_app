@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
@@ -8,6 +9,8 @@ class EarningsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Earnings')),
       body: SingleChildScrollView(
@@ -25,11 +28,11 @@ class EarningsScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text('Total Earned', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70)),
+                      Text('Total Earned', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.85))),
                   const SizedBox(height: 8),
                   Text('\$1,840', style: Theme.of(context).textTheme.displayLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
-                  Text('145 jobs completed', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70)),
+                      Text('145 jobs completed', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.85))),
                 ],
               ),
             ),
@@ -65,7 +68,7 @@ class EarningsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(m['month']!, style: Theme.of(context).textTheme.titleSmall),
-                              Text('${m['jobs']} jobs', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+                              Text('${m['jobs']} jobs', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryTextColor)),
                             ],
                           ),
                         ),
@@ -107,7 +110,7 @@ class _EarningSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+            Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: context.appTextSecondary)),
             const SizedBox(height: 4),
             Text(value, style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: color, fontWeight: FontWeight.w700)),
             Text('$jobs jobs', style: Theme.of(context).textTheme.labelSmall),

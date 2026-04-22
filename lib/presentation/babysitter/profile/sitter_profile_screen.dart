@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
@@ -127,18 +128,23 @@ class SitterProfileScreen extends ConsumerWidget {
   }
 
   Widget _menuSection(BuildContext context, String title, List<_MenuItem> items) {
+    final secondaryTextColor = context.appTextSecondary;
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+    final hintColor = context.appTextHint;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (title.isNotEmpty) ...[
-          Text(title, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary)),
+          Text(title, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: secondaryTextColor)),
           const SizedBox(height: AppSizes.sm),
         ],
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: surfaceColor,
             borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: borderColor),
           ),
           child: Column(
             children: items.asMap().entries.map((entry) {
@@ -155,7 +161,7 @@ class SitterProfileScreen extends ConsumerWidget {
                     child: Icon(item.icon, size: 18, color: item.color ?? AppColors.primary),
                   ),
                   title: Text(item.label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: item.color)),
-                  trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textHint),
+                  trailing: Icon(Icons.chevron_right_rounded, size: 18, color: hintColor),
                   onTap: item.onTap,
                 ),
                 if (i < items.length - 1) const Divider(height: 1, indent: 56),
@@ -201,6 +207,8 @@ class _SitterOnboardingState extends ConsumerState<SitterOnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final borderColor = context.appBorder;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -212,7 +220,7 @@ class _SitterOnboardingState extends ConsumerState<SitterOnboardingScreen> {
                   height: 4,
                   margin: EdgeInsets.only(right: i < 2 ? 4 : 0),
                   decoration: BoxDecoration(
-                    color: i <= _page ? AppColors.primary : AppColors.border,
+                    color: i <= _page ? AppColors.primary : borderColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -249,6 +257,7 @@ class _ExperiencePageState extends State<_ExperiencePage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Padding(
       padding: const EdgeInsets.all(AppSizes.pageHorizontal),
       child: Column(
@@ -282,6 +291,8 @@ class _SkillsPageState extends State<_SkillsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Padding(
       padding: const EdgeInsets.all(AppSizes.pageHorizontal),
       child: Column(
@@ -290,7 +301,7 @@ class _SkillsPageState extends State<_SkillsPage> {
           const SizedBox(height: AppSizes.lg),
           Text("Your Skills", style: Theme.of(context).textTheme.headlineLarge),
           const SizedBox(height: AppSizes.sm),
-          Text("Select all that apply", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+          Text("Select all that apply", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor)),
           const SizedBox(height: AppSizes.xl),
           Wrap(
             spacing: AppSizes.sm,
@@ -327,6 +338,8 @@ class _RatePageState extends State<_RatePage> {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Padding(
       padding: const EdgeInsets.all(AppSizes.pageHorizontal),
       child: Column(
@@ -335,7 +348,7 @@ class _RatePageState extends State<_RatePage> {
           const SizedBox(height: AppSizes.lg),
           Text("Set Your Rate", style: Theme.of(context).textTheme.headlineLarge),
           const SizedBox(height: AppSizes.sm),
-          Text("You can change this at any time", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+          Text("You can change this at any time", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor)),
           const SizedBox(height: AppSizes.xl),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -352,7 +365,7 @@ class _RatePageState extends State<_RatePage> {
                   decoration: const InputDecoration(border: InputBorder.none),
                 ),
               ),
-              Text('/hr', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.textSecondary)),
+              Text('/hr', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: secondaryTextColor)),
             ],
           ),
           const Spacer(),

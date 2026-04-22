@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
@@ -62,6 +63,7 @@ class _MyReviewsScreenState extends ConsumerState<MyReviewsScreen> {
   @override
   Widget build(BuildContext context) {
     final reviews = _applyFilters(_mockReviews);
+    final secondaryTextColor = context.appTextSecondary;
     final avgRating = reviews.isEmpty
         ? 0.0
         : reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
@@ -96,7 +98,7 @@ class _MyReviewsScreenState extends ConsumerState<MyReviewsScreen> {
                         Text(
                           '${avgRating.toStringAsFixed(1)} • ${reviews.length} review${reviews.length == 1 ? '' : 's'}',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
+                                color: secondaryTextColor,
                               ),
                         ),
                       ],
@@ -109,7 +111,7 @@ class _MyReviewsScreenState extends ConsumerState<MyReviewsScreen> {
             const SizedBox(height: AppSizes.md),
             Row(
               children: [
-                const Icon(Icons.filter_alt_rounded, size: 18, color: AppColors.textSecondary),
+                Icon(Icons.filter_alt_rounded, size: 18, color: secondaryTextColor),
                 const SizedBox(width: 6),
                 Text(
                   'Filters',
@@ -186,7 +188,7 @@ class _MyReviewsScreenState extends ConsumerState<MyReviewsScreen> {
                                   Text(
                                     review.dateLabel,
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: AppColors.textSecondary,
+                                          color: secondaryTextColor,
                                         ),
                                   ),
                                 ],

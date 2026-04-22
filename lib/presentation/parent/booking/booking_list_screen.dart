@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../application/booking/booking_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/enums/booking_status.dart';
 import '../../shared/widgets/shared_widgets.dart';
@@ -75,6 +76,9 @@ class _BookingListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+    final hintColor = context.appTextHint;
+
     return HodonCard(
       onTap: () => context.go('/parent/booking/${booking.id}'),
       child: Column(
@@ -95,7 +99,7 @@ class _BookingListItem extends StatelessWidget {
                     Text(booking.sitterUser?.fullName ?? 'Babysitter',
                         style: Theme.of(context).textTheme.titleSmall),
                     Text(booking.serviceType.label,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryTextColor)),
                   ],
                 ),
               ),
@@ -105,7 +109,7 @@ class _BookingListItem extends StatelessWidget {
           const SizedBox(height: AppSizes.sm),
           Row(
             children: [
-              const Icon(Icons.schedule_rounded, size: 14, color: AppColors.textHint),
+              Icon(Icons.schedule_rounded, size: 14, color: hintColor),
               const SizedBox(width: 4),
               Text(_fmtDate(booking.startDatetime), style: Theme.of(context).textTheme.bodySmall),
               const Spacer(),
@@ -123,7 +127,7 @@ class _BookingListItem extends StatelessWidget {
   Color _statusColor(BookingStatus s) {
     if (s.isActive) return AppColors.success;
     if (s == BookingStatus.pending) return AppColors.warning;
-    if (s.isPast && s != BookingStatus.completed && s != BookingStatus.rated) return AppColors.textHint;
+    if (s.isPast && s != BookingStatus.completed && s != BookingStatus.rated) return Colors.grey;
     if (s == BookingStatus.completed || s == BookingStatus.rated) return AppColors.success;
     return AppColors.primary;
   }
@@ -334,7 +338,7 @@ class _DetailSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary)),
+              Text(title, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: context.appTextSecondary)),
               const SizedBox(height: AppSizes.sm),
               child,
             ],
@@ -353,7 +357,7 @@ class _InfoRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 2),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: AppColors.textHint),
+            Icon(icon, size: 16, color: context.appTextHint),
             const SizedBox(width: AppSizes.sm),
             Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyMedium)),
           ],
@@ -374,7 +378,7 @@ class _PriceRow extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: isBold ? Theme.of(context).textTheme.titleSmall : Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+            Text(label, style: isBold ? Theme.of(context).textTheme.titleSmall : Theme.of(context).textTheme.bodySmall?.copyWith(color: context.appTextSecondary)),
             Text(value, style: (isBold ? Theme.of(context).textTheme.titleSmall : Theme.of(context).textTheme.bodySmall)?.copyWith(color: color, fontWeight: isBold ? FontWeight.w700 : null)),
           ],
         ),

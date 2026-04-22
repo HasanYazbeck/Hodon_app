@@ -57,6 +57,93 @@ class AppTheme {
     );
   }
 
+  static ThemeData get dark {
+    const darkBackground = Color(0xFF0F1018);
+    const darkSurface = Color(0xFF171927);
+    const darkSurfaceAlt = Color(0xFF222437);
+
+    final base = ThemeData(
+      useMaterial3: true,
+      colorScheme: const ColorScheme(
+        brightness: Brightness.dark,
+        primary: AppColors.primaryLight,
+        onPrimary: AppColors.white,
+        secondary: AppColors.secondaryLight,
+        onSecondary: Color(0xFF2B1A24),
+        error: AppColors.error,
+        onError: AppColors.white,
+        surface: darkSurface,
+        onSurface: Color(0xFFF3F2F7),
+        surfaceContainerHighest: darkSurfaceAlt,
+        onSurfaceVariant: Color(0xFFC5C2D3),
+        outline: Color(0xFF67637A),
+        outlineVariant: Color(0xFF343248),
+        shadow: Colors.black,
+      ),
+      scaffoldBackgroundColor: darkBackground,
+      fontFamily: GoogleFonts.poppins().fontFamily,
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return AppColors.primaryLight;
+          return const Color(0xFF9A97AB);
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return AppColors.primary.withValues(alpha: 0.5);
+          return const Color(0xFF3B394B);
+        }),
+      ),
+    );
+
+    return base.copyWith(
+      textTheme: GoogleFonts.poppinsTextTheme(base.textTheme).apply(
+        bodyColor: base.colorScheme.onSurface,
+        displayColor: base.colorScheme.onSurface,
+      ),
+      appBarTheme: base.appBarTheme.copyWith(
+        backgroundColor: darkBackground,
+        foregroundColor: base.colorScheme.onSurface,
+        centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
+      inputDecorationTheme: _inputDecorationTheme.copyWith(
+        fillColor: darkSurfaceAlt,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          borderSide: const BorderSide(color: Color(0xFF343248)),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          borderSide: const BorderSide(color: Color(0xFF343248)),
+        ),
+      ),
+      cardTheme: base.cardTheme.copyWith(
+        color: darkSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+          side: const BorderSide(color: Color(0xFF343248)),
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFF343248),
+        thickness: 1,
+        space: 1,
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: darkSurface,
+        selectedItemColor: AppColors.primaryLight,
+        unselectedItemColor: Color(0xFF9A97AB),
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        elevation: 8,
+      ),
+      dialogTheme: _dialogTheme.copyWith(
+        backgroundColor: darkSurface,
+      ),
+    );
+  }
+
   static TextTheme _buildTextTheme(TextTheme base) {
     return GoogleFonts.poppinsTextTheme(base).copyWith(
       displayLarge: GoogleFonts.poppins(

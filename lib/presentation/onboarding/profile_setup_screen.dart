@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../domain/enums/app_enums.dart';
@@ -168,6 +169,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   }
 
   Widget _buildProgressBar() {
+    final borderColor = context.appBorder;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.pageHorizontal, vertical: AppSizes.md),
       child: Row(
@@ -176,7 +179,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             height: 4,
             margin: EdgeInsets.only(right: i < 2 ? 4 : 0),
             decoration: BoxDecoration(
-              color: i <= _currentPage ? AppColors.primary : AppColors.border,
+              color: i <= _currentPage ? AppColors.primary : borderColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -195,6 +198,8 @@ class _PhotoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.pageHorizontal),
       child: Column(
@@ -203,7 +208,7 @@ class _PhotoPage extends StatelessWidget {
           const SizedBox(height: AppSizes.xl),
           Text('Add Your Photo', style: Theme.of(context).textTheme.headlineLarge, textAlign: TextAlign.center),
           const SizedBox(height: AppSizes.sm),
-          Text('Help families recognise you', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary), textAlign: TextAlign.center),
+          Text('Help families recognise you', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor), textAlign: TextAlign.center),
           const SizedBox(height: AppSizes.xxl),
           GestureDetector(
             onTap: onPickAvatar,
@@ -310,6 +315,8 @@ class _LocationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.pageHorizontal),
       child: Column(
@@ -318,7 +325,7 @@ class _LocationPage extends StatelessWidget {
           const SizedBox(height: AppSizes.xl),
           Text('Your Location', style: Theme.of(context).textTheme.headlineLarge),
           const SizedBox(height: AppSizes.sm),
-          Text('Help us show you nearby sitters', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+          Text('Help us show you nearby sitters', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor)),
           const SizedBox(height: AppSizes.xl),
           AppTextField(
             label: AppStrings.locationLabel,
@@ -357,6 +364,12 @@ class _DatePickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceVariantColor = context.appSurfaceVariant;
+    final borderColor = context.appBorder;
+    final secondaryTextColor = context.appTextSecondary;
+    final primaryTextColor = context.appTextPrimary;
+    final hintColor = context.appTextHint;
+
     return GestureDetector(
       onTap: () async {
         final picked = await showDatePicker(
@@ -370,13 +383,13 @@ class _DatePickerField extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.md),
         decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
+          color: surfaceVariantColor,
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: borderColor),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.textSecondary),
+            Icon(Icons.calendar_today_rounded, size: 20, color: secondaryTextColor),
             const SizedBox(width: AppSizes.sm),
             Expanded(
               child: Text(
@@ -384,7 +397,7 @@ class _DatePickerField extends StatelessWidget {
                     ? '${value!.day}/${value!.month}/${value!.year}'
                     : label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: value != null ? AppColors.textPrimary : AppColors.textHint,
+                  color: value != null ? primaryTextColor : hintColor,
                 ),
               ),
             ),

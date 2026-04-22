@@ -6,6 +6,7 @@ import 'package:pinput/pinput.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../application/providers.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../shared/widgets/app_button.dart';
@@ -86,14 +87,19 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceVariantColor = context.appSurfaceVariant;
+    final borderColor = context.appBorder;
+    final secondaryTextColor = context.appTextSecondary;
+    final hintColor = context.appTextHint;
+
     final defaultPinTheme = PinTheme(
       width: AppSizes.otpFieldSize,
       height: AppSizes.otpFieldSize,
       textStyle: Theme.of(context).textTheme.headlineMedium,
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
+        color: surfaceVariantColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
       ),
     );
 
@@ -125,7 +131,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               const SizedBox(height: AppSizes.sm),
               Text(
                 '${AppStrings.otpSubtitle}\n${widget.email}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSizes.xl),
@@ -157,7 +163,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               else
                 Text(
                   '${AppStrings.resendIn}${_secondsLeft}s',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textHint),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: hintColor),
                 ),
             ],
           ),

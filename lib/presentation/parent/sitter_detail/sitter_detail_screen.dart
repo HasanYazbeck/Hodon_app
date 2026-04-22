@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../application/sitter/sitter_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/enums/app_enums.dart';
 import '../../../domain/models/babysitter_profile.dart';
@@ -33,8 +34,10 @@ class _SitterDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = context.appBackground;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: backgroundColor,
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(context),
@@ -54,15 +57,18 @@ class _SitterDetailView extends StatelessWidget {
   }
 
   Widget _buildSliverAppBar(BuildContext context) {
+    final backgroundColor = context.appBackground;
+    final surfaceColor = context.appSurface;
+
     return SliverAppBar(
       expandedHeight: 280,
       pinned: true,
-      backgroundColor: AppColors.background,
+      backgroundColor: backgroundColor,
       leading: IconButton(
         icon: Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: surfaceColor,
             shape: BoxShape.circle,
             boxShadow: [BoxShadow(color: AppColors.cardShadow, blurRadius: 8)],
           ),
@@ -75,7 +81,7 @@ class _SitterDetailView extends StatelessWidget {
           icon: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: surfaceColor,
               shape: BoxShape.circle,
               boxShadow: [BoxShadow(color: AppColors.cardShadow, blurRadius: 8)],
             ),
@@ -111,6 +117,8 @@ class _SitterDetailView extends StatelessWidget {
   }
 
   Widget _buildProfileHeader(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Padding(
       padding: const EdgeInsets.all(AppSizes.pageHorizontal),
       child: Column(
@@ -131,7 +139,7 @@ class _SitterDetailView extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           '${sitter.profile.rating.toStringAsFixed(1)} · ${sitter.profile.reviewsCount} reviews',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor),
                         ),
                       ],
                     ),
@@ -223,6 +231,8 @@ class _SitterDetailView extends StatelessWidget {
 
   Widget _buildAbout(BuildContext context) {
     if (sitter.user.bio == null) return const SizedBox.shrink();
+    final secondaryTextColor = context.appTextSecondary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.pageHorizontal),
       child: Column(
@@ -232,7 +242,7 @@ class _SitterDetailView extends StatelessWidget {
           const SizedBox(height: AppSizes.sm),
           Text(
             sitter.user.bio!,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary, height: 1.7),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor, height: 1.7),
           ),
           const SizedBox(height: AppSizes.lg),
         ],

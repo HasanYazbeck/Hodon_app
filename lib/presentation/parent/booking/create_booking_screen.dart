@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../application/booking/booking_provider.dart';
 import '../../../application/sitter/sitter_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../domain/enums/app_enums.dart';
@@ -50,6 +51,7 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(createBookingProvider(widget.sitterId));
+    final secondaryTextColor = context.appTextSecondary;
 
     ref.listen(createBookingProvider(widget.sitterId), (_, next) {
       if (next.error != null) {
@@ -210,7 +212,7 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
                         Text('Trust Circle First', style: Theme.of(context).textTheme.titleSmall),
                         Text(
                           'Notify your trusted network before others',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryTextColor),
                         ),
                       ],
                     ),
@@ -253,12 +255,15 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
 
   Widget _buildPriceSummary(BuildContext context, formState) {
     final p = formState.pricing!;
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+
     return Container(
       padding: const EdgeInsets.all(AppSizes.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         children: [
@@ -336,17 +341,21 @@ class _TypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isEmergency ? AppColors.emergency : AppColors.primary;
+    final borderColor = context.appBorder;
+    final surfaceVariant = context.appSurfaceVariant;
+    final secondaryTextColor = context.appTextSecondary;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.surfaceVariant,
+          color: isSelected ? color.withValues(alpha: 0.1) : surfaceVariant,
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          border: Border.all(color: isSelected ? color : AppColors.border, width: isSelected ? 1.5 : 1),
+          border: Border.all(color: isSelected ? color : borderColor, width: isSelected ? 1.5 : 1),
         ),
-        child: Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isSelected ? color : AppColors.textSecondary)),
+        child: Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isSelected ? color : secondaryTextColor)),
       ),
     );
   }
@@ -365,9 +374,9 @@ class _DateTimePickerButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: 14),
           decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
+            color: context.appSurfaceVariant,
             borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: context.appBorder),
           ),
           child: Row(
             children: [
@@ -392,9 +401,9 @@ class _LocationPickerButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSizes.md),
           decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
+            color: context.appSurfaceVariant,
             borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-            border: Border.all(color: address != null ? AppColors.primary : AppColors.border),
+            border: Border.all(color: address != null ? AppColors.primary : context.appBorder),
           ),
           child: Row(
             children: [
@@ -404,11 +413,11 @@ class _LocationPickerButton extends StatelessWidget {
                 child: Text(
                   address ?? 'Select location',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: address != null ? AppColors.textPrimary : AppColors.textHint,
+                        color: address != null ? context.appTextPrimary : context.appTextHint,
                       ),
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+              Icon(Icons.chevron_right_rounded, color: context.appTextHint),
             ],
           ),
         ),
@@ -431,7 +440,7 @@ class _PriceRow extends StatelessWidget {
           children: [
             Text(
               label,
-              style: isBold ? Theme.of(context).textTheme.titleMedium : Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: isBold ? Theme.of(context).textTheme.titleMedium : Theme.of(context).textTheme.bodyMedium?.copyWith(color: context.appTextSecondary),
             ),
             Text(
               value,

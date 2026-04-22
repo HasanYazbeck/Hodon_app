@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
@@ -89,6 +90,8 @@ class _BabysitterNotificationsScreenState
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredNotifications;
+    final secondaryTextColor = context.appTextSecondary;
+    final hintColor = context.appTextHint;
 
     return Scaffold(
       appBar: AppBar(
@@ -132,14 +135,14 @@ class _BabysitterNotificationsScreenState
                 const SizedBox(height: AppSizes.sm),
                 Row(
                   children: [
-                    const Icon(Icons.filter_alt_rounded,
-                        size: 18, color: AppColors.textSecondary),
+                    Icon(Icons.filter_alt_rounded,
+                        size: 18, color: secondaryTextColor),
                     const SizedBox(width: 6),
                     Text('Date:',
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall
-                            ?.copyWith(color: AppColors.textSecondary)),
+                            ?.copyWith(color: secondaryTextColor)),
                     const SizedBox(width: 8),
                     DropdownButton<_DateFilter>(
                       value: _selectedDate,
@@ -209,7 +212,7 @@ class _BabysitterNotificationsScreenState
                         style: Theme.of(context)
                             .textTheme
                             .labelSmall
-                            ?.copyWith(color: AppColors.textHint),
+                            ?.copyWith(color: hintColor),
                       ),
                     ],
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/utils/communication_service.dart';
 import '../widgets/shared_widgets.dart';
@@ -10,6 +11,8 @@ class HelpSupportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Help & Support')),
       body: SingleChildScrollView(
@@ -42,7 +45,7 @@ class HelpSupportScreen extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
-                              ?.copyWith(color: AppColors.textSecondary),
+                              ?.copyWith(color: secondaryTextColor),
                         ),
                       ],
                     ),
@@ -92,7 +95,7 @@ class HelpSupportScreen extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
-                              ?.copyWith(color: AppColors.textSecondary, height: 1.35),
+                              ?.copyWith(color: secondaryTextColor, height: 1.35),
                         ),
                       ),
                     ],
@@ -152,6 +155,9 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+    final hintColor = context.appTextHint;
+
     return HodonCard(
       onTap: onTap,
       child: Row(
@@ -176,12 +182,12 @@ class _ActionTile extends StatelessWidget {
                   style: Theme.of(context)
                       .textTheme
                       .bodySmall
-                      ?.copyWith(color: AppColors.textSecondary),
+                      ?.copyWith(color: secondaryTextColor),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+          Icon(Icons.chevron_right_rounded, color: hintColor),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../application/sitter/sitter_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../data/repositories/interfaces/i_sitter_repository.dart';
 import '../../../domain/enums/app_enums.dart';
@@ -25,10 +26,13 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXl)),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXl)),
       ),
       child: Column(
         children: [
@@ -39,7 +43,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: borderColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -248,7 +252,7 @@ class _SwitchRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: AppSizes.xs),
         child: Row(
           children: [
-            Icon(icon, size: AppSizes.iconMd, color: AppColors.textSecondary),
+            Icon(icon, size: AppSizes.iconMd, color: context.appTextSecondary),
             const SizedBox(width: AppSizes.sm),
             Expanded(child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
             Switch(

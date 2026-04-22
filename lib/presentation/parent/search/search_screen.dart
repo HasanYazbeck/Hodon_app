@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../application/sitter/sitter_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../data/repositories/interfaces/i_sitter_repository.dart';
@@ -46,11 +47,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget build(BuildContext context) {
     final sittersAsync = ref.watch(sitterSearchProvider);
     final filter = ref.watch(sitterFilterProvider);
+    final backgroundColor = context.appBackground;
 
     ref.listen(sitterFilterProvider, (_, __) => _loadSitters(reset: true));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text(AppStrings.searchSitters),
         actions: [
@@ -117,17 +119,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           prefixIcon: const Icon(Icons.search_rounded),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-            borderSide: const BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: context.appBorder),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-            borderSide: const BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: context.appBorder),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radiusFull),
             borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
           ),
-          fillColor: AppColors.surface,
+          fillColor: context.appSurface,
           filled: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
         ),
@@ -222,29 +224,33 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+    final secondaryTextColor = context.appTextSecondary;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : AppColors.surface,
+          color: isActive ? AppColors.primary : surfaceColor,
           borderRadius: BorderRadius.circular(AppSizes.radiusFull),
           border: Border.all(
-            color: isActive ? AppColors.primary : AppColors.border,
+            color: isActive ? AppColors.primary : borderColor,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: isActive ? Colors.white : AppColors.textSecondary),
+            Icon(icon, size: 14, color: isActive ? Colors.white : secondaryTextColor),
             const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: isActive ? Colors.white : AppColors.textSecondary,
+                color: isActive ? Colors.white : secondaryTextColor,
               ),
             ),
           ],
@@ -262,6 +268,9 @@ class _SitterListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hintColor = context.appTextHint;
+    final secondaryTextColor = context.appTextSecondary;
+
     return HodonCard(
       onTap: onTap,
       child: Row(
@@ -326,10 +335,11 @@ class _SitterListCard extends StatelessWidget {
                     const SizedBox(width: AppSizes.sm),
                     if (sitter.distanceKm != null) ...[
                       const Icon(Icons.location_on_rounded,
-                          size: 12, color: AppColors.textHint),
+                          size: 12),
+                      const SizedBox(width: 2),
                       Text(
                         '${sitter.distanceKm!.toStringAsFixed(1)} km',
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: hintColor),
                       ),
                     ],
                   ],
@@ -359,7 +369,7 @@ class _SitterListCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: secondaryTextColor,
                         ),
                   ),
                 ],

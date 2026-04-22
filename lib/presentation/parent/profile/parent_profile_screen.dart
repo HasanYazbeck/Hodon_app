@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
@@ -12,6 +13,8 @@ class ParentProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    final secondaryTextColor = context.appTextSecondary;
+    final hintColor = context.appTextHint;
 
     return Scaffold(
       appBar: AppBar(
@@ -39,13 +42,13 @@ class ParentProfileScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSizes.md),
                   Text(user?.fullName ?? '', style: Theme.of(context).textTheme.headlineMedium),
-                  Text(user?.email ?? '', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+                  Text(user?.email ?? '', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor)),
                   if (user?.address != null) ...[
                     const SizedBox(height: 4),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.location_on_rounded, size: 14, color: AppColors.textHint),
+                        Icon(Icons.location_on_rounded, size: 14, color: hintColor),
                         Text(user!.address!.fullAddress, style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ),
@@ -98,17 +101,23 @@ class ParentProfileScreen extends ConsumerWidget {
   }
 
   void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Log Out'),
         content: const Text('Are you sure you want to log out?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(authProvider.notifier).logout();
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                context.go('/login');
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Log Out'),
@@ -125,11 +134,15 @@ class _MenuSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+    final hintColor = context.appTextHint;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         children: items.asMap().entries.map((entry) {
@@ -147,7 +160,7 @@ class _MenuSection extends StatelessWidget {
                   child: Icon(item.icon, size: 18, color: item.color ?? AppColors.primary),
                 ),
                 title: Text(item.label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: item.color)),
-                trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textHint),
+                trailing: Icon(Icons.chevron_right_rounded, size: 18, color: hintColor),
                 onTap: item.onTap,
               ),
               if (i < items.length - 1) const Divider(height: 1, indent: 56),
@@ -167,4 +180,3 @@ class _MenuItem {
 
   const _MenuItem({required this.icon, required this.label, required this.onTap, this.color});
 }
-

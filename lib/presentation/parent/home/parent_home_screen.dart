@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../application/booking/booking_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/communication_service.dart';
@@ -19,9 +20,10 @@ class ParentHomeScreen extends ConsumerWidget {
     final activeBookingsAsync = ref.watch(activeParentBookingsProvider);
 
     final greeting = _greeting();
+    final backgroundColor = context.appBackground;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async => ref.invalidate(activeParentBookingsProvider),
@@ -90,6 +92,8 @@ class ParentHomeScreen extends ConsumerWidget {
   }
 
   void _showQuickSupportOptions(BuildContext context) {
+    final hintColor = context.appTextHint;
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -105,7 +109,7 @@ class ParentHomeScreen extends ConsumerWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.textHint,
+                color: hintColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -206,6 +210,10 @@ class ParentHomeScreen extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, String greeting, String name) {
+    final secondaryTextColor = context.appTextSecondary;
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSizes.pageHorizontal, AppSizes.lg, AppSizes.pageHorizontal, AppSizes.sm,
@@ -224,7 +232,7 @@ class ParentHomeScreen extends ConsumerWidget {
                 Text(
                   'Find trusted care for your little ones',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: secondaryTextColor,
                       ),
                 ),
               ],
@@ -237,10 +245,10 @@ class ParentHomeScreen extends ConsumerWidget {
                 onPressed: () => context.go('/parent/notifications'),
                 icon: const Icon(Icons.notifications_rounded),
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.surface,
+                  backgroundColor: surfaceColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                    side: const BorderSide(color: AppColors.border),
+                    side: BorderSide(color: borderColor),
                   ),
                 ),
               ),
@@ -319,6 +327,8 @@ class ParentHomeScreen extends ConsumerWidget {
   }
 
   Widget _buildQuickActions(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.pageHorizontal,
@@ -350,7 +360,7 @@ class ParentHomeScreen extends ConsumerWidget {
           _QuickActionTile(
             icon: Icons.history_rounded,
             label: 'History',
-            color: AppColors.textSecondary,
+            color: secondaryTextColor,
             onTap: () => context.go('/parent/bookings'),
           ),
         ],
@@ -465,7 +475,7 @@ class _BookingCard extends StatelessWidget {
   Color _statusColor(BookingStatus s) {
     if (s.isActive) return AppColors.success;
     if (s == BookingStatus.pending) return AppColors.warning;
-    if (s.isPast) return AppColors.textHint;
+    if (s.isPast) return Colors.grey;
     return AppColors.primary;
   }
 }

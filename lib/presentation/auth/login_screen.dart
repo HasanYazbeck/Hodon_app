@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/validators.dart';
@@ -105,6 +106,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,19 +141,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         const SizedBox(height: AppSizes.xs),
         Text(
           AppStrings.loginSubtitle,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: secondaryTextColor),
         ),
       ],
     );
   }
 
   Widget _buildRegisterLink(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           AppStrings.dontHaveAccount,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor),
         ),
         TextButton(
           onPressed: () => context.go('/register'),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../shared/widgets/shared_widgets.dart';
@@ -51,7 +52,7 @@ class ChatListScreen extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: (c['unread'] as int) > 0 ? AppColors.textPrimary : AppColors.textSecondary,
+                          color: (c['unread'] as int) > 0 ? context.appTextPrimary : context.appTextSecondary,
                           fontWeight: (c['unread'] as int) > 0 ? FontWeight.w600 : null,
                         ),
                   ),
@@ -112,7 +113,7 @@ class _ChatScreenState extends State<ChatScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Lara Haddad', style: Theme.of(context).textTheme.titleSmall),
-                Text('Babysitter', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary)),
+                Text('Babysitter', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: context.appTextSecondary)),
               ],
             ),
           ],
@@ -169,7 +170,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               m['text'] as String,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: isMe ? Colors.white : AppColors.textPrimary,
+                                color: isMe ? Colors.white : context.appTextPrimary,
                                 height: 1.4,
                               ),
                             ),
@@ -185,41 +186,49 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           // Input bar
-          Container(
-            padding: EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.sm, AppSizes.sm + MediaQuery.of(context).padding.bottom),
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(top: BorderSide(color: AppColors.border)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _ctrl,
-                    decoration: InputDecoration(
-                      hintText: AppStrings.typeAMessage,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSizes.radiusFull), borderSide: BorderSide.none),
-                      filled: true,
-                      fillColor: AppColors.surfaceVariant,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
+          Builder(
+            builder: (context) {
+              final surfaceColor = context.appSurface;
+              final borderColor = context.appBorder;
+              final inputFill = context.appSurfaceVariant;
+
+              return Container(
+                padding: EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.sm, AppSizes.sm + MediaQuery.of(context).padding.bottom),
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  border: Border(top: BorderSide(color: borderColor)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _ctrl,
+                        decoration: InputDecoration(
+                          hintText: AppStrings.typeAMessage,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSizes.radiusFull), borderSide: BorderSide.none),
+                          filled: true,
+                          fillColor: inputFill,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
+                        ),
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _send(),
+                        maxLines: null,
+                      ),
                     ),
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _send(),
-                    maxLines: null,
-                  ),
+                    const SizedBox(width: AppSizes.sm),
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                      child: IconButton(
+                        icon: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                        onPressed: _send,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSizes.sm),
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                  child: IconButton(
-                    icon: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
-                    onPressed: _send,
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ],
       ),

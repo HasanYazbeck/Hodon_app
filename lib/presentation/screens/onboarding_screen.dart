@@ -19,19 +19,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       emoji: '👶',
       title: 'Find Trusted\nBabysitters',
       subtitle: 'Connect with verified, background-checked babysitters in your neighbourhood.',
-      gradient: [Color(0xFF7C5CBF), Color(0xFFA88FD4)],
+      gradient: [AppColors.primary, AppColors.primaryLight],
     ),
     _OnboardingPage(
       emoji: '🛡️',
       title: 'Your Trust Circle',
       subtitle: 'Build a network of trusted carers. They get first priority for emergency bookings.',
-      gradient: [Color(0xFF5A3D9A), Color(0xFF7C5CBF)],
+      gradient: [AppColors.primaryDark, AppColors.primary],
     ),
     _OnboardingPage(
       emoji: '⚡',
       title: 'Book in Minutes',
       subtitle: 'Scheduled or emergency — get a reliable sitter whenever you need one.',
-      gradient: [Color(0xFFE8A0B4), Color(0xFF7C5CBF)],
+      gradient: [AppColors.secondary, AppColors.primaryLight],
     ),
   ];
 
@@ -65,7 +65,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               onPressed: () => context.go('/login'),
               child: const Text(
                 'Skip',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -97,8 +97,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 height: 8,
                 decoration: BoxDecoration(
                   color: i == _currentPage
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.4),
+                      ? AppColors.white
+                      : AppColors.white.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -109,7 +109,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ElevatedButton(
               onPressed: () => context.go('/register'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.white,
                 foregroundColor: AppColors.primary,
                 minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
                 shape: RoundedRectangleBorder(
@@ -123,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               onPressed: () => context.go('/login'),
               child: const Text(
                 'Already have an account? Sign In',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: AppColors.white),
               ),
             ),
           ] else
@@ -133,7 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 curve: Curves.easeInOut,
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.white,
                 foregroundColor: AppColors.primary,
                 minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
                 shape: RoundedRectangleBorder(
@@ -185,7 +185,7 @@ class _OnboardingPage extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: AppColors.white,
                   height: 1.2,
                 ),
                 textAlign: TextAlign.center,
@@ -195,7 +195,7 @@ class _OnboardingPage extends StatelessWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withValues(alpha: 0.85),
+                  color: AppColors.white.withValues(alpha: 0.85),
                   height: 1.6,
                 ),
                 textAlign: TextAlign.center,
@@ -208,4 +208,3 @@ class _OnboardingPage extends StatelessWidget {
     );
   }
 }
-

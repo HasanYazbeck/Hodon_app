@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/models/models.dart';
 import '../../../domain/enums/app_enums.dart';
@@ -42,6 +43,7 @@ class _TrustCircleScreenState extends ConsumerState<TrustCircleScreen> {
   @override
   Widget build(BuildContext context) {
     final members = ref.watch(trustCircleProvider);
+    final secondaryTextColor = context.appTextSecondary;
 
     return Scaffold(
       appBar: AppBar(
@@ -76,7 +78,7 @@ class _TrustCircleScreenState extends ConsumerState<TrustCircleScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'During emergency bookings, your Trust Circle is notified first. Only if no one responds do we reach out to the broader sitter pool.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary, height: 1.5),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryTextColor, height: 1.5),
                   ),
                 ],
               ),
@@ -103,7 +105,7 @@ class _TrustCircleScreenState extends ConsumerState<TrustCircleScreen> {
                         Text('Trust Circle First', style: Theme.of(context).textTheme.titleSmall),
                         Text(
                           'Always notify my circle before others',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryTextColor),
                         ),
                       ],
                     ),

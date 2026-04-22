@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
 class NotificationsScreen extends StatelessWidget {
@@ -38,7 +39,7 @@ class NotificationsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(n['body'] as String, style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4)),
-                      Text(n['time'] as String, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textHint)),
+                      Text(n['time'] as String, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: context.appTextHint)),
                     ],
                   ),
                   trailing: isUnread ? Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle)) : null,

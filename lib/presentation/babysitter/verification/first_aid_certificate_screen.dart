@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/enums/app_enums.dart';
 
@@ -62,6 +63,10 @@ class _FirstAidCertificateScreenState extends ConsumerState<FirstAidCertificateS
   Widget build(BuildContext context) {
     final isUnderReview = _status == VerificationStatus.underReview;
     final isApproved = _status == VerificationStatus.approved;
+    final secondaryTextColor = context.appTextSecondary;
+    final surfaceColor = context.appSurface;
+    final surfaceVariantColor = context.appSurfaceVariant;
+    final borderColor = context.appBorder;
 
     return Scaffold(
       appBar: AppBar(title: const Text('First Aid Certificate')),
@@ -76,7 +81,7 @@ class _FirstAidCertificateScreenState extends ConsumerState<FirstAidCertificateS
             Text(
               'Submit a valid first aid certificate to strengthen your trust profile.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: secondaryTextColor,
                   ),
             ),
             const SizedBox(height: AppSizes.xl),
@@ -112,9 +117,9 @@ class _FirstAidCertificateScreenState extends ConsumerState<FirstAidCertificateS
             Container(
               padding: const EdgeInsets.all(AppSizes.md),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: surfaceColor,
                 borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: borderColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,7 +129,7 @@ class _FirstAidCertificateScreenState extends ConsumerState<FirstAidCertificateS
                   Text(
                     'Accepted formats: PDF, JPG, PNG',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: secondaryTextColor,
                         ),
                   ),
                   const SizedBox(height: AppSizes.sm),
@@ -144,9 +149,9 @@ class _FirstAidCertificateScreenState extends ConsumerState<FirstAidCertificateS
                     Container(
                       padding: const EdgeInsets.all(AppSizes.sm),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceVariant,
+                        color: surfaceVariantColor,
                         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(color: borderColor),
                       ),
                       child: Row(
                         children: [

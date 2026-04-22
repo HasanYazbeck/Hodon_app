@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../application/auth/auth_provider.dart';
+import '../../../core/constants/app_colors.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -52,7 +53,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF7C5CBF), Color(0xFFA88FD4)],
+            colors: [AppColors.primary, AppColors.primaryLight],
           ),
         ),
         child: Center(
@@ -63,39 +64,30 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Text(
-                        '🌟',
-                        style: TextStyle(fontSize: 48),
-                      ),
-                    ),
+                  Image.asset(
+                    'assets/icons/Hodon_Logo.png',
+                    width: 700,
+                    height: 650,
                   ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Hodon',
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Trusted Childcare, Near You',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
+                  // const SizedBox(height: 24),
+                  // const Text(
+                  //   'Hodon',
+                  //   style: TextStyle(
+                  //     fontSize: 40,
+                  //     fontWeight: FontWeight.w800,
+                  //     color: AppColors.white,
+                  //     letterSpacing: 1,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 8),
+                  // Text(
+                  //   'Trusted Childcare, Near You',
+                  //   style: TextStyle(
+                  //     fontSize: 16,
+                  //     color: AppColors.white.withValues(alpha: 0.85),
+                  //     fontWeight: FontWeight.w400,
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -105,4 +97,3 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
   }
 }
-

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 
 class AppTextField extends StatelessWidget {
@@ -106,7 +105,7 @@ class _PasswordFieldState extends State<PasswordField> {
       suffixIcon: IconButton(
         icon: Icon(
           _obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-          color: AppColors.textHint,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           size: AppSizes.iconMd,
         ),
         onPressed: () => setState(() => _obscure = !_obscure),

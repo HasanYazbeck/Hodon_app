@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../application/auth/auth_provider.dart';
+import '../../../application/theme/theme_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -10,6 +12,10 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final isDarkMode = themeMode == ThemeMode.dark;
+    final hintColor = context.appTextHint;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
@@ -17,7 +23,17 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           _Section(title: 'Preferences', items: [
             _SettingsItem(icon: Icons.language_rounded, label: 'Language', trailing: const Text('English')),
-            _SettingsItem(icon: Icons.dark_mode_rounded, label: 'Dark Mode', trailing: const Switch(value: false, onChanged: null)),
+            _SettingsItem(
+              icon: Icons.dark_mode_rounded,
+              label: 'Dark Mode',
+              trailing: Switch(
+                value: isDarkMode,
+                onChanged: (value) {
+                  ref.read(themeModeProvider.notifier).state =
+                      value ? ThemeMode.dark : ThemeMode.light;
+                },
+              ),
+            ),
             _SettingsItem(icon: Icons.notifications_rounded, label: 'Push Notifications', trailing: const Switch(value: true, onChanged: null)),
           ]),
           const SizedBox(height: AppSizes.md),
@@ -41,14 +57,19 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.logout_rounded,
               label: 'Log Out',
               color: AppColors.error,
-              onTap: () => ref.read(authProvider.notifier).logout(),
+              onTap: () async {
+                await ref.read(authProvider.notifier).logout();
+                if (context.mounted) {
+                  context.go('/login');
+                }
+              },
             ),
           ]),
           const SizedBox(height: AppSizes.lg),
           Center(
             child: Text(
               'Hodon v1.0.0\nMade with ❤️ in Lebanon',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: hintColor),
               textAlign: TextAlign.center,
             ),
           ),
@@ -67,18 +88,23 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+    final secondaryTextColor = context.appTextSecondary;
+    final hintColor = context.appTextHint;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (title != null) ...[
-          Text(title!, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary)),
+          Text(title!, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: secondaryTextColor)),
           const SizedBox(height: AppSizes.sm),
         ],
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: surfaceColor,
             borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: borderColor),
           ),
           child: Column(
             children: items.asMap().entries.map((e) {
@@ -95,7 +121,7 @@ class _Section extends StatelessWidget {
                     child: Icon(item.icon, size: 18, color: item.color ?? AppColors.primary),
                   ),
                   title: Text(item.label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: item.color)),
-                  trailing: item.trailing ?? (item.onTap != null ? const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textHint) : null),
+                  trailing: item.trailing ?? (item.onTap != null ? Icon(Icons.chevron_right_rounded, size: 18, color: hintColor) : null),
                   onTap: item.onTap,
                 ),
                 if (!isLast) const Divider(height: 1, indent: 56),
@@ -117,4 +143,3 @@ class _SettingsItem {
 
   const _SettingsItem({required this.icon, required this.label, this.trailing, this.onTap, this.color});
 }
-
