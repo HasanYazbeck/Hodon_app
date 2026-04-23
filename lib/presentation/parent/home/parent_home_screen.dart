@@ -9,6 +9,7 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/communication_service.dart';
 import '../../../domain/enums/booking_status.dart';
+import '../../../domain/models/booking.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
 class ParentHomeScreen extends ConsumerWidget {
@@ -417,19 +418,22 @@ class _QuickActionTile extends StatelessWidget {
 }
 
 class _BookingCard extends StatelessWidget {
-  final dynamic booking;
+  final Booking booking;
 
   const _BookingCard({required this.booking});
 
   @override
   Widget build(BuildContext context) {
+    // Safety check: ensure booking has valid status
+    final statusLabel = _getStatusLabel();
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.pageHorizontal,
         vertical: AppSizes.xs,
       ),
       child: HodonCard(
-        onTap: () => context.go('/parent/booking/${booking.id}'),
+        onTap: () => context.push('/parent/booking/${booking.id}'),
         child: Row(
           children: [
             UserAvatar(
@@ -455,13 +459,22 @@ class _BookingCard extends StatelessWidget {
               ),
             ),
             StatusChip(
-              label: booking.status.label,
+              label: statusLabel,
               color: _statusColor(booking.status),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _getStatusLabel() {
+    try {
+      return booking.status.label;
+    } catch (e) {
+      // Fallback in case of any error
+      return booking.status.name.replaceAll(RegExp(r'([A-Z])'), ' \$1').trim();
+    }
   }
 
   String _formatDateTime(DateTime dt) {
@@ -499,4 +512,3 @@ class _BookingsShimmer extends StatelessWidget {
     );
   }
 }
-

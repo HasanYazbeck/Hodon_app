@@ -103,6 +103,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final warningBannerColor = context.isDarkMode
+        ? AppColors.warning.withValues(alpha: 0.16)
+        : AppColors.warningContainer;
+    final receivedBubbleColor = context.isDarkMode
+        ? context.appSurfaceVariant
+        : AppColors.bubbleReceived;
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -124,7 +131,7 @@ class _ChatScreenState extends State<ChatScreen> {
           // Safety banner
           Container(
             padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
-            color: AppColors.warningContainer,
+            color: warningBannerColor,
             child: Row(
               children: [
                 const Icon(Icons.shield_rounded, size: 14, color: AppColors.warning),
@@ -158,7 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65),
                             decoration: BoxDecoration(
-                              color: isMe ? AppColors.bubbleSent : AppColors.bubbleReceived,
+                              color: isMe ? AppColors.bubbleSent : receivedBubbleColor,
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(16),
                                 topRight: const Radius.circular(16),
@@ -235,4 +242,3 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
-

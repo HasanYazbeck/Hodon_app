@@ -44,7 +44,7 @@ class ChildrenScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add_rounded),
-            onPressed: () => context.go('/parent/add-child'),
+            onPressed: () => context.push('/parent/add-child'),
           ),
         ],
       ),
@@ -54,7 +54,7 @@ class ChildrenScreen extends ConsumerWidget {
               title: 'No children added',
               subtitle: 'Add your children\'s profiles to book care',
               action: ElevatedButton(
-                onPressed: () => context.go('/parent/add-child'),
+                onPressed: () => context.push('/parent/add-child'),
                 child: const Text('Add Child'),
               ),
             )
@@ -68,12 +68,12 @@ class ChildrenScreen extends ConsumerWidget {
   }
 }
 
-class _ChildCard extends StatelessWidget {
+class _ChildCard extends ConsumerWidget {
   final ChildProfile child;
   const _ChildCard({required this.child});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final secondaryTextColor = context.appTextSecondary;
     final hintColor = context.appTextHint;
 
@@ -116,16 +116,50 @@ class _ChildCard extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.edit_rounded, size: 18, color: hintColor),
-            onPressed: () {},
+            onPressed: () => context.push('/parent/edit-child/${child.id}'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
+            onPressed: () => _confirmDelete(context, ref),
           ),
         ],
       ),
     );
   }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Child Profile'),
+        content: Text('Delete ${child.name}\'s profile? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+
+    final children = ref.read(childrenProvider);
+    ref.read(childrenProvider.notifier).state = [
+      for (final current in children)
+        if (current.id != child.id) current,
+    ];
+  }
 }
 
 class AddChildScreen extends ConsumerStatefulWidget {
-  const AddChildScreen({super.key});
+  final String? childId;
+  const AddChildScreen({super.key, this.childId});
 
   @override
   ConsumerState<AddChildScreen> createState() => _AddChildScreenState();
@@ -141,29 +175,63 @@ class _AddChildScreenState extends ConsumerState<AddChildScreen> {
   ChildAgeGroup _selectedAgeGroup = ChildAgeGroup.toddler;
   bool _isSaving = false;
 
+  bool get _isEditMode => widget.childId != null;
+
   @override
-  void dispose() {
-    _nameCtrl.dispose(); _ageCtrl.dispose(); _allergiesCtrl.dispose();
-    _routinesCtrl.dispose(); _notesCtrl.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _prefillIfEditing();
+  }
+
+  void _prefillIfEditing() {
+    if (!_isEditMode) return;
+    final existing = ref
+        .read(childrenProvider)
+        .where((c) => c.id == widget.childId)
+        .firstOrNull;
+    if (existing == null) return;
+
+    _nameCtrl.text = existing.name;
+    _ageCtrl.text = existing.ageMonths.toString();
+    _allergiesCtrl.text = existing.allergies ?? '';
+    _routinesCtrl.text = existing.routines ?? '';
+    _notesCtrl.text = existing.notes ?? '';
+    _selectedAgeGroup = existing.ageGroup;
   }
 
   void _save() {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSaving = true);
     final ageMonths = int.tryParse(_ageCtrl.text) ?? 12;
+    final baseChild = _isEditMode
+        ? ref
+            .read(childrenProvider)
+            .where((c) => c.id == widget.childId)
+            .firstOrNull
+        : null;
+
     final child = ChildProfile(
-      id: 'child_${DateTime.now().millisecondsSinceEpoch}',
-      parentId: 'user_parent_1',
+      id: baseChild?.id ?? 'child_${DateTime.now().millisecondsSinceEpoch}',
+      parentId: baseChild?.parentId ?? 'user_parent_1',
       name: _nameCtrl.text.trim(),
       ageMonths: ageMonths,
       ageGroup: _selectedAgeGroup,
       allergies: _allergiesCtrl.text.trim().isEmpty ? null : _allergiesCtrl.text.trim(),
       routines: _routinesCtrl.text.trim().isEmpty ? null : _routinesCtrl.text.trim(),
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
-      createdAt: DateTime.now(),
+      createdAt: baseChild?.createdAt ?? DateTime.now(),
     );
-    ref.read(childrenProvider.notifier).state = [...ref.read(childrenProvider), child];
+
+    final children = ref.read(childrenProvider);
+    if (_isEditMode) {
+      ref.read(childrenProvider.notifier).state = [
+        for (final current in children)
+          if (current.id == child.id) child else current,
+      ];
+    } else {
+      ref.read(childrenProvider.notifier).state = [...children, child];
+    }
+
     setState(() => _isSaving = false);
     context.pop();
   }
@@ -172,7 +240,7 @@ class _AddChildScreenState extends ConsumerState<AddChildScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Child'),
+        title: Text(_isEditMode ? 'Edit Child' : 'Add Child'),
         leading: IconButton(icon: const Icon(Icons.arrow_back_rounded), onPressed: () => context.pop()),
       ),
       body: Form(
@@ -229,7 +297,11 @@ class _AddChildScreenState extends ConsumerState<AddChildScreen> {
                 maxLines: 3,
               ),
               const SizedBox(height: AppSizes.xl),
-              AppButton(label: 'Save Child', onPressed: _save, isLoading: _isSaving),
+              AppButton(
+                label: _isEditMode ? 'Update Child' : 'Save Child',
+                onPressed: _save,
+                isLoading: _isSaving,
+              ),
               const SizedBox(height: AppSizes.xl),
             ],
           ),
@@ -238,4 +310,3 @@ class _AddChildScreenState extends ConsumerState<AddChildScreen> {
     );
   }
 }
-

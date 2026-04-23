@@ -60,7 +60,7 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
         );
       }
       if (next.result != null) {
-        context.go('/parent/booking/${next.result!.id}');
+        context.push('/parent/booking/${next.result!.id}');
       }
     });
 

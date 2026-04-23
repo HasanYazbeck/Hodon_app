@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../application/auth/auth_provider.dart';
 import '../../../application/booking/booking_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/utils/communication_service.dart';
 import '../../../domain/enums/app_enums.dart';
@@ -21,7 +22,7 @@ class BabysitterHomeScreen extends ConsumerWidget {
     final bookingsAsync = ref.watch(sitterBookingsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -99,6 +100,10 @@ class BabysitterHomeScreen extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, String name) {
+    final secondaryTextColor = context.appTextSecondary;
+    final surfaceColor = context.appSurface;
+    final borderColor = context.appBorder;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSizes.pageHorizontal, AppSizes.lg, AppSizes.pageHorizontal, AppSizes.sm),
       child: Row(
@@ -108,17 +113,17 @@ class BabysitterHomeScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Hello, $name 👋', style: Theme.of(context).textTheme.headlineMedium),
-                Text('Ready to care today?', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+                Text('Ready to care today?', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor)),
               ],
             ),
           ),
           IconButton(
             icon: const Icon(Icons.notifications_rounded),
             style: IconButton.styleFrom(
-              backgroundColor: AppColors.surface,
+              backgroundColor: surfaceColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                side: const BorderSide(color: AppColors.border),
+                side: BorderSide(color: borderColor),
               ),
             ),
             onPressed: () => context.go('/babysitter/notifications'),
@@ -276,73 +281,91 @@ class _RequestCard extends StatelessWidget {
 }
 
   void _showQuickSupportOptions(BuildContext context) {
+    final hintColor = context.appTextHint;
+
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXl)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.textHint,
-                borderRadius: BorderRadius.circular(2),
+      builder: (context) => SafeArea(
+        top: false,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSizes.md,
+                AppSizes.md,
+                AppSizes.md,
+                AppSizes.md + MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Handle bar
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: hintColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+                  Text(
+                    'Get Quick Help',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  ListTile(
+                    leading: const Icon(Icons.chat_rounded),
+                    title: const Text('Chat with Support'),
+                    subtitle: const Text('Live messaging'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/babysitter/chat');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.email_rounded),
+                    title: const Text('Send Email'),
+                    subtitle: const Text(CommunicationService.supportEmail),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _sendEmailSupport(context);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.phone_rounded),
+                    title: const Text('Call Us'),
+                    subtitle: const Text(CommunicationService.supportPhoneDisplay),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _callSupport(context);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.message_rounded),
+                    title: const Text('WhatsApp'),
+                    subtitle: const Text('Chat via WhatsApp'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _whatsappSupport(context);
+                    },
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: AppSizes.lg),
-            Text(
-              'Get Quick Help',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: AppSizes.md),
-            ListTile(
-              leading: const Icon(Icons.chat_rounded),
-              title: const Text('Chat with Support'),
-              subtitle: const Text('Live messaging'),
-              onTap: () {
-                Navigator.pop(context);
-                context.go('/babysitter/chat');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.email_rounded),
-              title: const Text('Send Email'),
-              subtitle: const Text(CommunicationService.supportEmail),
-              onTap: () {
-                Navigator.pop(context);
-                _sendEmailSupport(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.phone_rounded),
-              title: const Text('Call Us'),
-              subtitle: const Text(CommunicationService.supportPhoneDisplay),
-              onTap: () {
-                Navigator.pop(context);
-                _callSupport(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.message_rounded),
-              title: const Text('WhatsApp'),
-              subtitle: const Text('Chat via WhatsApp'),
-              onTap: () {
-                Navigator.pop(context);
-                _whatsappSupport(context);
-              },
-            ),
-            const SizedBox(height: AppSizes.md),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -5,7 +5,9 @@ import '../../../application/booking/booking_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
+import '../../../domain/enums/app_enums.dart';
 import '../../../domain/enums/booking_status.dart';
+import '../../../domain/models/booking.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
 class BookingListScreen extends ConsumerWidget {
@@ -47,7 +49,7 @@ class BookingListScreen extends ConsumerWidget {
 }
 
 class _BookingTab extends StatelessWidget {
-  final List bookings;
+  final List<Booking> bookings;
   final bool isPast;
 
   const _BookingTab({required this.bookings, this.isPast = false});
@@ -71,7 +73,7 @@ class _BookingTab extends StatelessWidget {
 }
 
 class _BookingListItem extends StatelessWidget {
-  final dynamic booking;
+  final Booking booking;
   const _BookingListItem({required this.booking});
 
   @override
@@ -80,7 +82,7 @@ class _BookingListItem extends StatelessWidget {
     final hintColor = context.appTextHint;
 
     return HodonCard(
-      onTap: () => context.go('/parent/booking/${booking.id}'),
+      onTap: () => context.push('/parent/booking/${booking.id}'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -103,7 +105,7 @@ class _BookingListItem extends StatelessWidget {
                   ],
                 ),
               ),
-              StatusChip(label: booking.status.label, color: _statusColor(booking.status)),
+               StatusChip(label: booking.status.label, color: _statusColor(booking.status)),
             ],
           ),
           const SizedBox(height: AppSizes.sm),
@@ -161,118 +163,133 @@ class BookingDetailScreen extends ConsumerWidget {
 }
 
 class _BookingDetailView extends ConsumerWidget {
-  final dynamic booking;
+  final Booking booking;
   const _BookingDetailView({required this.booking});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final actionState = ref.watch(bookingActionProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Booking Details'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back_rounded), onPressed: () => context.pop()),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.pageHorizontal),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Status header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSizes.md),
-              decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
-                borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-              ),
-              child: Column(
-                children: [
-                  Text(booking.status.label, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.primary)),
-                  const SizedBox(height: 4),
-                  Text('Booking #${booking.id.substring(0, 8)}', style: Theme.of(context).textTheme.bodySmall),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSizes.lg),
-
-            // Sitter info
-            _DetailSection(
-              title: 'Babysitter',
-              child: Row(
-                children: [
-                  UserAvatar(imageUrl: booking.sitterUser?.avatarUrl, name: booking.sitterUser?.fullName, size: 52),
-                  const SizedBox(width: AppSizes.md),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(booking.sitterUser?.fullName ?? 'Sitter', style: Theme.of(context).textTheme.titleMedium),
-                      TextButton.icon(
-                        onPressed: () => context.go('/chat/conv_${booking.sitterId}'),
-                        icon: const Icon(Icons.chat_bubble_outline_rounded, size: 14),
-                        label: const Text('Message'),
-                        style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Date/Time
-            _DetailSection(
-              title: 'Date & Time',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _InfoRow(Icons.calendar_today_rounded, _fmtDate(booking.startDatetime)),
-                  _InfoRow(Icons.schedule_rounded, '${booking.durationHours.toStringAsFixed(1)} hours'),
-                ],
-              ),
-            ),
-
-            // Location
-            _DetailSection(
-              title: 'Location',
-              child: _InfoRow(Icons.location_on_rounded, booking.location.fullAddress),
-            ),
-
-            // Pricing
-            _DetailSection(
-              title: 'Payment Summary',
-              child: Column(
-                children: [
-                  _PriceRow('Subtotal', '\$${booking.pricing.subtotal.toStringAsFixed(2)}'),
-                  _PriceRow('Platform Fee', '\$${booking.pricing.platformCommission.toStringAsFixed(2)}'),
-                  if (booking.pricing.emergencyFee > 0)
-                    _PriceRow('Emergency Fee', '\$${booking.pricing.emergencyFee.toStringAsFixed(2)}', color: AppColors.emergency),
-                  const Divider(),
-                  _PriceRow('Total', '\$${booking.pricing.total.toStringAsFixed(2)}', isBold: true, color: AppColors.primary),
-                  _PriceRow('Payment', booking.pricing.paymentMethod.label),
-                ],
-              ),
-            ),
-
-            if (booking.status.canCancel) ...[
-              const SizedBox(height: AppSizes.lg),
-              OutlinedButton(
-                onPressed: actionState is AsyncLoading
-                    ? null
-                    : () => _showCancelDialog(context, ref),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
-                  minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _goToBookings(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Booking Details'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () => _goToBookings(context),
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.pageHorizontal),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Status header
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSizes.md),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryContainer,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                 ),
-                child: const Text('Cancel Booking'),
+                child: Column(
+                  children: [
+                    Text(booking.status.label, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.primary)),
+                    const SizedBox(height: 4),
+                    Text('Booking #${booking.id.substring(0, 8)}', style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
               ),
+              const SizedBox(height: AppSizes.lg),
+
+              // Sitter info
+              _DetailSection(
+                title: 'Babysitter',
+                child: Row(
+                  children: [
+                    UserAvatar(imageUrl: booking.sitterUser?.avatarUrl, name: booking.sitterUser?.fullName, size: 52),
+                    const SizedBox(width: AppSizes.md),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(booking.sitterUser?.fullName ?? 'Sitter', style: Theme.of(context).textTheme.titleMedium),
+                        TextButton.icon(
+                          onPressed: () => context.go('/chat/conv_${booking.sitterId}'),
+                          icon: const Icon(Icons.chat_bubble_outline_rounded, size: 14),
+                          label: const Text('Message'),
+                          style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Date/Time
+              _DetailSection(
+                title: 'Date & Time',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _InfoRow(Icons.calendar_today_rounded, _fmtDate(booking.startDatetime)),
+                    _InfoRow(Icons.schedule_rounded, '${booking.durationHours.toStringAsFixed(1)} hours'),
+                  ],
+                ),
+              ),
+
+              // Location
+              _DetailSection(
+                title: 'Location',
+                child: _InfoRow(Icons.location_on_rounded, booking.location.fullAddress),
+              ),
+
+              // Pricing
+              _DetailSection(
+                title: 'Payment Summary',
+                child: Column(
+                  children: [
+                    _PriceRow('Subtotal', '\$${booking.pricing.subtotal.toStringAsFixed(2)}'),
+                    _PriceRow('Platform Fee', '\$${booking.pricing.platformCommission.toStringAsFixed(2)}'),
+                    if (booking.pricing.emergencyFee > 0)
+                      _PriceRow('Emergency Fee', '\$${booking.pricing.emergencyFee.toStringAsFixed(2)}', color: AppColors.emergency),
+                    const Divider(),
+                    _PriceRow('Total', '\$${booking.pricing.total.toStringAsFixed(2)}', isBold: true, color: AppColors.primary),
+                    _PriceRow('Payment', booking.pricing.paymentMethod.label),
+                  ],
+                ),
+              ),
+
+              if (booking.status.canCancel) ...[
+                const SizedBox(height: AppSizes.lg),
+                OutlinedButton(
+                  onPressed: actionState is AsyncLoading
+                      ? null
+                      : () => _showCancelDialog(context, ref),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                    minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
+                  ),
+                  child: const Text('Cancel Booking'),
+                ),
+              ],
+              const SizedBox(height: AppSizes.xl),
             ],
-            const SizedBox(height: AppSizes.xl),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  void _goToBookings(BuildContext context) {
+    context.go('/parent/bookings');
   }
 
   Future<void> _showCancelDialog(BuildContext context, WidgetRef ref) async {
@@ -384,4 +401,3 @@ class _PriceRow extends StatelessWidget {
         ),
       );
 }
-

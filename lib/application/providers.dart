@@ -7,6 +7,7 @@ import '../../data/repositories/interfaces/i_booking_repository.dart';
 import '../../data/repositories/mock/mock_auth_repository.dart';
 import '../../data/repositories/mock/mock_sitter_repository.dart';
 import '../../data/repositories/mock/mock_booking_repository.dart';
+import '../../data/repositories/remote/remote_auth_repository.dart';
 
 // ── Core services ──────────────────────────────────────────────────────────
 
@@ -21,7 +22,13 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 // ── Repositories ───────────────────────────────────────────────────────────
 
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {
-  // Swap MockAuthRepository → RemoteAuthRepository when backend is ready
+  const useRemoteAuth = bool.fromEnvironment('USE_REMOTE_AUTH', defaultValue: false);
+  if (useRemoteAuth) {
+    return RemoteAuthRepository(
+      apiClient: ref.watch(apiClientProvider),
+      storage: ref.watch(secureStorageProvider),
+    );
+  }
   return MockAuthRepository(ref.watch(secureStorageProvider));
 });
 

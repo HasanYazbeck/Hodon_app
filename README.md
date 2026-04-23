@@ -1,6 +1,69 @@
 # hodon_app
 
-A new Flutter project.
+Hodon marketplace app foundation (parents + babysitters) with Riverpod, GoRouter, and repository-based data sources.
+
+## Remote Auth Setup (Step by Step)
+
+The app now includes `RemoteAuthRepository` at:
+- `lib/data/repositories/remote/remote_auth_repository.dart`
+
+Auth repository selection is controlled in:
+- `lib/application/providers.dart`
+
+By default, mock auth is still used. Enable remote auth with `--dart-define=USE_REMOTE_AUTH=true`.
+
+### 1) Prepare backend endpoints
+
+Make sure your backend exposes these endpoints (matching `lib/core/constants/api_endpoints.dart`):
+- `POST /auth/register`
+- `POST /auth/verify-otp`
+- `POST /auth/resend-otp`
+- `POST /auth/login`
+- `POST /auth/logout`
+- `POST /auth/forgot-password`
+- `POST /auth/reset-password`
+- `GET /users/me`
+- `PUT /users/me` (profile + role updates)
+
+Expected auth response for login should include:
+- `accessToken`
+- `refreshToken`
+- `user` (or user retrievable from `/users/me`)
+
+### 2) Run app against your backend base URL
+
+Use compile-time defines:
+
+```powershell
+flutter run --dart-define=USE_REMOTE_AUTH=true --dart-define=API_BASE_URL=https://your-api-domain.com/v1
+```
+
+### 3) Test core auth flow
+
+- Register a new account
+- Verify OTP
+- Login
+- Confirm role/profile routing
+- Logout and login again
+
+### 4) Keep mock mode for local UI work
+
+If backend is unavailable, run without remote flag:
+
+```powershell
+flutter run
+```
+
+### 5) Troubleshooting
+
+- `UNVERIFIED_EMAIL` is preserved from backend errors and used by UI routing logic.
+- If login returns tokens but no user object, app fetches `/users/me` automatically.
+- If `/users/me` returns 401, local tokens are cleared.
+
+## Notes
+
+- `ApiClient` already handles auth header injection and token refresh interceptor.
+- Tokens/user identity are persisted via `SecureStorageService`.
 
 ## Getting Started
 

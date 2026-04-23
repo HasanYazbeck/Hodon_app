@@ -37,6 +37,8 @@ import '../../presentation/shared/chat/chat_list_screen.dart';
 import '../../presentation/shared/notifications/notifications_screen.dart';
 import '../../presentation/shared/settings/settings_screen.dart';
 import '../../presentation/shared/support/help_support_screen.dart';
+import '../../presentation/shared/support/contact_us_screen.dart';
+import '../../presentation/shared/support/report_bug_screen.dart';
 import '../../presentation/onboarding/profile_setup_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -112,6 +114,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/role-selection', builder: (_, __) => const RoleSelectionScreen()),
       GoRoute(path: '/profile-setup', builder: (_, __) => const ProfileSetupScreen()),
       GoRoute(path: '/help-support', builder: (_, __) => const HelpSupportScreen()),
+      GoRoute(path: '/contact-us', builder: (_, __) => const ContactUsScreen()),
+      GoRoute(path: '/report-bug', builder: (_, __) => const ReportBugScreen()),
 
       // Parent shell
       ShellRoute(
@@ -140,6 +144,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(path: '/parent/children', builder: (_, __) => const ChildrenScreen()),
           GoRoute(path: '/parent/add-child', builder: (_, __) => const AddChildScreen()),
+          GoRoute(
+            path: '/parent/edit-child/:childId',
+            builder: (_, state) => AddChildScreen(
+              childId: state.pathParameters['childId']!,
+            ),
+          ),
           GoRoute(path: '/parent/trust-circle', builder: (_, __) => const TrustCircleScreen()),
           GoRoute(path: '/parent/profile', builder: (_, __) => const ParentProfileScreen()),
           GoRoute(path: '/parent/onboarding', builder: (_, __) => const ProfileSetupScreen()),

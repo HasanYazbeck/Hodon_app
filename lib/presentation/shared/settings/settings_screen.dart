@@ -36,16 +36,16 @@ class SettingsScreen extends ConsumerWidget {
             ),
             _SettingsItem(icon: Icons.notifications_rounded, label: 'Push Notifications', trailing: const Switch(value: true, onChanged: null)),
           ]),
-          const SizedBox(height: AppSizes.md),
-          _Section(title: 'Support', items: [
-            _SettingsItem(
-              icon: Icons.help_outline_rounded,
-              label: 'Help & Support',
-              onTap: () => context.push('/help-support'),
-            ),
-            _SettingsItem(icon: Icons.chat_rounded, label: 'Contact Us', onTap: () {}),
-            _SettingsItem(icon: Icons.bug_report_rounded, label: 'Report a Bug', onTap: () {}),
-          ]),
+          // const SizedBox(height: AppSizes.md),
+          // _Section(title: 'Support', items: [
+          //   // _SettingsItem(
+          //   //   icon: Icons.help_outline_rounded,
+          //   //   label: 'Help & Support',
+          //   //   onTap: () => context.push('/help-support'),
+          //   // ),
+          //   // _SettingsItem(icon: Icons.chat_rounded, label: 'Contact Us', onTap: () => context.push('/contact-us')),
+          //   _SettingsItem(icon: Icons.bug_report_rounded, label: 'Report a Bug', onTap: () {}),
+          // ]),
           const SizedBox(height: AppSizes.md),
           _Section(title: 'Legal', items: [
             _SettingsItem(icon: Icons.description_outlined, label: 'Terms of Service', onTap: () {}),

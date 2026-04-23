@@ -96,7 +96,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       separatorBuilder: (_, __) => const SizedBox(height: AppSizes.sm),
                       itemBuilder: (_, i) => _SitterListCard(
                         sitter: sitters[i],
-                        onTap: () => context.go('/parent/sitter/${sitters[i].user.id}'),
+                        onTap: () => _openSitterDetails(sitters[i]),
                       ),
                     ),
             ),
@@ -206,6 +206,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         builder: (_, ctrl) => FilterSheet(scrollController: ctrl),
       ),
     );
+  }
+
+  void _openSitterDetails(SitterCard sitter) {
+    final sitterId = sitter.user.id.trim();
+    if (sitterId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open sitter profile right now.')),
+      );
+      return;
+    }
+
+    context.push('/parent/sitter/${Uri.encodeComponent(sitterId)}');
   }
 }
 
@@ -399,4 +411,3 @@ class _SitterListCard extends StatelessWidget {
         TrustBadge.repeatFamilyFavorite => AppColors.emergency,
       };
 }
-

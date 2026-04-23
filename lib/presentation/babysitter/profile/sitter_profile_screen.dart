@@ -109,6 +109,14 @@ class SitterProfileScreen extends ConsumerWidget {
                     ),
                   ]),
                   const SizedBox(height: AppSizes.md),
+                  _menuSection(context, 'Support', [
+                    _MenuItem(
+                      icon: Icons.bug_report_rounded,
+                      label: 'Report a Bug',
+                      onTap: () => context.push('/report-bug'),
+                    ),
+                  ]),
+                  const SizedBox(height: AppSizes.md),
                   _menuSection(context, '', [
                     _MenuItem(
                       icon: Icons.logout_rounded,
@@ -380,4 +388,3 @@ class _RatePageState extends State<_RatePage> {
     );
   }
 }
-

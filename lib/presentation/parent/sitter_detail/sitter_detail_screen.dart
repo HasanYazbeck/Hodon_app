@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/context_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../domain/enums/app_enums.dart';
+import '../../../domain/models/models.dart';
 import '../../../domain/models/babysitter_profile.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
@@ -28,7 +29,7 @@ class SitterDetailScreen extends ConsumerWidget {
 
 class _SitterDetailView extends StatelessWidget {
   final SitterCard sitter;
-  final AsyncValue reviewsAsync;
+  final AsyncValue<List<Review>> reviewsAsync;
 
   const _SitterDetailView({required this.sitter, required this.reviewsAsync});
 
@@ -426,7 +427,7 @@ class _StatTile extends StatelessWidget {
 }
 
 class _ReviewCard extends StatelessWidget {
-  final dynamic review;
+  final Review review;
   const _ReviewCard({required this.review});
 
   @override
@@ -453,4 +454,3 @@ class _ReviewCard extends StatelessWidget {
         ),
       );
 }
-
