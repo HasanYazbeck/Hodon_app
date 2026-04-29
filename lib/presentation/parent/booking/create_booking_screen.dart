@@ -69,7 +69,7 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
         title: const Text(AppStrings.bookingDetails),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
+          onPressed: () => _handleBack(context),
         ),
       ),
       body: SingleChildScrollView(
@@ -251,6 +251,14 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
         ),
       ),
     );
+  }
+
+  void _handleBack(BuildContext context) {
+    if (GoRouter.of(context).canPop()) {
+      context.pop();
+      return;
+    }
+    context.go('/parent/search');
   }
 
   Widget _buildPriceSummary(BuildContext context, formState) {

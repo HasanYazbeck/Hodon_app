@@ -64,30 +64,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset(
-                    'assets/icons/Hodon_Logo.png',
-                    width: 700,
-                    height: 650,
+                  FittedBox(
+                    fit: BoxFit.contain,
+                    child: Image.asset(
+                      'assets/icons/Hodon_Logo.png',
+                      width: MediaQuery.of(context).size.width * 0.7,
+                    ),
                   ),
-                  // const SizedBox(height: 24),
-                  // const Text(
-                  //   'Hodon',
-                  //   style: TextStyle(
-                  //     fontSize: 40,
-                  //     fontWeight: FontWeight.w800,
-                  //     color: AppColors.white,
-                  //     letterSpacing: 1,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 8),
-                  // Text(
-                  //   'Trusted Childcare, Near You',
-                  //   style: TextStyle(
-                  //     fontSize: 16,
-                  //     color: AppColors.white.withValues(alpha: 0.85),
-                  //     fontWeight: FontWeight.w400,
-                  //   ),
-                  // ),
                 ],
               ),
             ),

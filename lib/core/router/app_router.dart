@@ -16,6 +16,7 @@ import '../../presentation/parent/sitter_detail/sitter_detail_screen.dart';
 import '../../presentation/parent/booking/create_booking_screen.dart';
 import '../../presentation/parent/booking/booking_list_screen.dart';
 import '../../presentation/parent/children/children_screen.dart';
+import '../../presentation/parent/payments/payment_methods_screen.dart';
 import '../../presentation/parent/trust_circle/trust_circle_screen.dart';
 import '../../presentation/parent/profile/parent_profile_screen.dart';
 import '../../presentation/babysitter/home/babysitter_home_screen.dart';
@@ -150,8 +151,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               childId: state.pathParameters['childId']!,
             ),
           ),
+          GoRoute(path: '/parent/payment-methods', builder: (_, __) => const PaymentMethodsScreen()),
           GoRoute(path: '/parent/trust-circle', builder: (_, __) => const TrustCircleScreen()),
           GoRoute(path: '/parent/profile', builder: (_, __) => const ParentProfileScreen()),
+          GoRoute(path: '/parent/edit-profile', builder: (_, __) => const ProfileSetupScreen()),
           GoRoute(path: '/parent/onboarding', builder: (_, __) => const ProfileSetupScreen()),
           GoRoute(path: '/parent/chat', builder: (_, __) => const ChatListScreen()),
           GoRoute(

@@ -101,7 +101,9 @@ class CreateBookingFormState {
 
 class CreateBookingNotifier extends StateNotifier<CreateBookingFormState> {
   CreateBookingNotifier(this._ref, String sitterId)
-      : super(CreateBookingFormState(sitterId: sitterId));
+      : super(CreateBookingFormState(sitterId: sitterId)) {
+    _loadDefaultPaymentMethod();
+  }
 
   final Ref _ref;
 
@@ -114,6 +116,17 @@ class CreateBookingNotifier extends StateNotifier<CreateBookingFormState> {
   void setPaymentMethod(PaymentMethod m) => state = state.copyWith(paymentMethod: m);
   void setNotes(String n) => state = state.copyWith(notes: n);
   void setUseTrustCircle(bool v) => state = state.copyWith(useTrustCircle: v);
+
+  Future<void> _loadDefaultPaymentMethod() async {
+    try {
+      final methods = await _ref.read(paymentRepositoryProvider).getPaymentMethods();
+      final defaultMethod = methods.where((method) => method.isDefault).firstOrNull;
+      if (!mounted || defaultMethod == null) return;
+      state = state.copyWith(paymentMethod: defaultMethod.type);
+    } catch (_) {
+      // Keep the booking form usable with its existing fallback if payments fail to load.
+    }
+  }
 
   Future<bool> submit() async {
     if (state.startDatetime == null || state.endDatetime == null || state.location == null) {

@@ -21,6 +21,10 @@ class ParentProfileScreen extends ConsumerWidget {
         title: const Text('Profile'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.edit_rounded),
+            onPressed: () => context.go('/parent/edit-profile'),
+          ),
+          IconButton(
             icon: const Icon(Icons.settings_rounded),
             onPressed: () => context.go('/parent/settings'),
           ),
@@ -60,29 +64,24 @@ class ParentProfileScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.pageHorizontal),
               child: Column(
                 children: [
-                  _MenuSection(items: [
+                  _menuSection(context, 'Profile', [
+                    _MenuItem(icon: Icons.edit_rounded, label: 'Edit Profile', onTap: () => context.go('/parent/edit-profile')),
                     _MenuItem(icon: Icons.child_care_rounded, label: 'My Children', onTap: () => context.go('/parent/children')),
                     _MenuItem(icon: Icons.people_rounded, label: 'Trust Circle', onTap: () => context.go('/parent/trust-circle')),
                     _MenuItem(icon: Icons.calendar_today_rounded, label: 'Booking History', onTap: () => context.go('/parent/bookings')),
                   ]),
                   const SizedBox(height: AppSizes.md),
-                  _MenuSection(items: [
+                  _menuSection(context, 'Account', [
                     _MenuItem(icon: Icons.notifications_rounded, label: 'Notifications', onTap: () => context.go('/parent/notifications')),
-                    _MenuItem(icon: Icons.payment_rounded, label: 'Payment Methods', onTap: () {}),
-                    _MenuItem(icon: Icons.language_rounded, label: 'Language', onTap: () {}),
+                    _MenuItem(icon: Icons.payment_rounded, label: 'Payment Methods', onTap: () => context.push('/parent/payment-methods')),
                   ]),
                   const SizedBox(height: AppSizes.md),
-                  _MenuSection(items: [
-                    _MenuItem(
-                      icon: Icons.help_outline_rounded,
-                      label: 'Help & Support',
-                      onTap: () => context.push('/help-support'),
-                    ),
-                    _MenuItem(icon: Icons.privacy_tip_outlined, label: 'Privacy Policy', onTap: () {}),
-                    _MenuItem(icon: Icons.description_outlined, label: 'Terms of Service', onTap: () {}),
+                  _menuSection(context, 'Support', [
+                    _MenuItem( icon: Icons.help_outline_rounded, label: 'Help & Support', onTap: () => context.push('/help-support')),
                   ]),
-                  const SizedBox(height: AppSizes.md),
-                  _MenuSection(items: [
+
+                  const SizedBox(height: AppSizes.lg),
+                  _menuSection(context, '', [
                     _MenuItem(
                       icon: Icons.logout_rounded,
                       label: 'Log Out',
@@ -126,50 +125,53 @@ class ParentProfileScreen extends ConsumerWidget {
       ),
     );
   }
-}
 
-class _MenuSection extends StatelessWidget {
-  final List<_MenuItem> items;
-  const _MenuSection({required this.items});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _menuSection(BuildContext context, String title, List<_MenuItem> items) {
+    final secondaryTextColor = context.appTextSecondary;
     final surfaceColor = context.appSurface;
     final borderColor = context.appBorder;
     final hintColor = context.appTextHint;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        children: items.asMap().entries.map((entry) {
-          final i = entry.key;
-          final item = entry.value;
-          return Column(
-            children: [
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: (item.color ?? AppColors.primary).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (title.isNotEmpty) ...[
+          Text(title, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: secondaryTextColor)),
+          const SizedBox(height: AppSizes.sm),
+        ],
+        Container(
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+            border: Border.all(color: borderColor),
+          ),
+          child: Column(
+            children: items.asMap().entries.map((entry) {
+              final i = entry.key;
+              final item = entry.value;
+              return Column(children: [
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: (item.color ?? AppColors.primary).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                    ),
+                    child: Icon(item.icon, size: 18, color: item.color ?? AppColors.primary),
                   ),
-                  child: Icon(item.icon, size: 18, color: item.color ?? AppColors.primary),
+                  title: Text(item.label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: item.color)),
+                  trailing: Icon(Icons.chevron_right_rounded, size: 18, color: hintColor),
+                  onTap: item.onTap,
                 ),
-                title: Text(item.label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: item.color)),
-                trailing: Icon(Icons.chevron_right_rounded, size: 18, color: hintColor),
-                onTap: item.onTap,
-              ),
-              if (i < items.length - 1) const Divider(height: 1, indent: 56),
-            ],
-          );
-        }).toList(),
-      ),
+                if (i < items.length - 1) const Divider(height: 1, indent: 56),
+              ]);
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
+
 }
 
 class _MenuItem {
@@ -177,6 +179,5 @@ class _MenuItem {
   final String label;
   final VoidCallback onTap;
   final Color? color;
-
   const _MenuItem({required this.icon, required this.label, required this.onTap, this.color});
 }

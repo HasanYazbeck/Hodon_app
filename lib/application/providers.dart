@@ -4,9 +4,11 @@ import '../../core/network/api_client.dart';
 import '../../data/repositories/interfaces/i_auth_repository.dart';
 import '../../data/repositories/interfaces/i_sitter_repository.dart';
 import '../../data/repositories/interfaces/i_booking_repository.dart';
+import '../../data/repositories/interfaces/i_payment_repository.dart';
 import '../../data/repositories/mock/mock_auth_repository.dart';
 import '../../data/repositories/mock/mock_sitter_repository.dart';
 import '../../data/repositories/mock/mock_booking_repository.dart';
+import '../../data/repositories/mock/mock_payment_repository.dart';
 import '../../data/repositories/remote/remote_auth_repository.dart';
 
 // ── Core services ──────────────────────────────────────────────────────────
@@ -38,5 +40,9 @@ final sitterRepositoryProvider = Provider<ISitterRepository>((ref) {
 
 final bookingRepositoryProvider = Provider<IBookingRepository>((ref) {
   return MockBookingRepository();
+});
+
+final paymentRepositoryProvider = Provider<IPaymentRepository>((ref) {
+  return MockPaymentRepository();
 });
 
