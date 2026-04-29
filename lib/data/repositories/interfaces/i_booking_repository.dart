@@ -8,6 +8,7 @@ abstract class IBookingRepository {
     required String sitterId,
     required List<String> childrenIds,
     required ServiceType serviceType,
+    required CareLocationType careLocationType,
     required BookingType bookingType,
     required DateTime startDatetime,
     required DateTime endDatetime,
@@ -20,7 +21,10 @@ abstract class IBookingRepository {
 
   Future<List<Booking>> getParentBookings({BookingStatus? statusFilter});
 
-  Future<List<Booking>> getSitterBookings({BookingStatus? statusFilter});
+  Future<List<Booking>> getSitterBookings({
+    BookingStatus? statusFilter,
+    String? sitterId,
+  });
 
   Future<Booking> getBookingDetail(String bookingId);
 
@@ -34,4 +38,3 @@ abstract class IBookingRepository {
 
   Future<Booking> checkOut(String bookingId);
 }
-

@@ -327,7 +327,7 @@ class _SitterListCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '\$${sitter.profile.hourlyRate.toInt()}${AppStrings.perHour}',
+                      'From \$${sitter.profile.startingHourlyRate.toStringAsFixed(0)}${AppStrings.perHour}',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w700,
@@ -374,6 +374,19 @@ class _SitterListCard extends StatelessWidget {
                         )),
                   ],
                 ),
+                if (sitter.profile.supportedCareLocations.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    sitter.profile.supportedCareLocations
+                        .map((location) => location.label)
+                        .join(' • '),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: secondaryTextColor,
+                        ),
+                  ),
+                ],
                 if (sitter.user.bio != null) ...[
                   const SizedBox(height: 6),
                   Text(

@@ -45,15 +45,22 @@ class ParentProfileScreen extends ConsumerWidget {
                     showBorder: true,
                   ),
                   const SizedBox(height: AppSizes.md),
-                  Text(user?.fullName ?? '', style: Theme.of(context).textTheme.headlineMedium),
-                  Text(user?.email ?? '', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: secondaryTextColor)),
+                  Text(user?.fullName ?? '',
+                      style: Theme.of(context).textTheme.headlineMedium),
+                  Text(user?.email ?? '',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: secondaryTextColor)),
                   if (user?.address != null) ...[
                     const SizedBox(height: 4),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.location_on_rounded, size: 14, color: hintColor),
-                        Text(user!.address!.fullAddress, style: Theme.of(context).textTheme.bodySmall),
+                        Icon(Icons.location_on_rounded,
+                            size: 14, color: hintColor),
+                        Text(user!.address!.fullAddress,
+                            style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ),
                   ],
@@ -61,25 +68,51 @@ class ParentProfileScreen extends ConsumerWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.pageHorizontal),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.pageHorizontal),
               child: Column(
                 children: [
                   _menuSection(context, 'Profile', [
-                    _MenuItem(icon: Icons.edit_rounded, label: 'Edit Profile', onTap: () => context.go('/parent/edit-profile')),
-                    _MenuItem(icon: Icons.child_care_rounded, label: 'My Children', onTap: () => context.go('/parent/children')),
-                    _MenuItem(icon: Icons.people_rounded, label: 'Trust Circle', onTap: () => context.go('/parent/trust-circle')),
-                    _MenuItem(icon: Icons.calendar_today_rounded, label: 'Booking History', onTap: () => context.go('/parent/bookings')),
+                    _MenuItem(
+                        icon: Icons.edit_rounded,
+                        label: 'Edit Profile',
+                        onTap: () => context.go('/parent/edit-profile')),
+                    _MenuItem(
+                        icon: Icons.child_care_rounded,
+                        label: 'My Children',
+                        onTap: () => context.go('/parent/children')),
+                    _MenuItem(
+                        icon: Icons.people_rounded,
+                        label: 'Trust Circle',
+                        onTap: () => context.go('/parent/trust-circle')),
+                    _MenuItem(
+                        icon: Icons.calendar_today_rounded,
+                        label: 'Booking History',
+                        onTap: () => context.go('/parent/bookings')),
                   ]),
                   const SizedBox(height: AppSizes.md),
                   _menuSection(context, 'Account', [
-                    _MenuItem(icon: Icons.notifications_rounded, label: 'Notifications', onTap: () => context.go('/parent/notifications')),
-                    _MenuItem(icon: Icons.payment_rounded, label: 'Payment Methods', onTap: () => context.push('/parent/payment-methods')),
+                    _MenuItem(
+                        icon: Icons.notifications_rounded,
+                        label: 'Notifications',
+                        onTap: () => context.go('/parent/notifications')),
+                    _MenuItem(
+                        icon: Icons.payment_rounded,
+                        label: 'Payment Methods',
+                        onTap: () => context.push('/parent/payment-methods')),
+                    _MenuItem(
+                        icon: Icons.description_outlined,
+                        label: 'Terms & Conditions',
+                        onTap: () =>
+                            context.push('/parent/terms-and-conditions')),
                   ]),
                   const SizedBox(height: AppSizes.md),
                   _menuSection(context, 'Support', [
-                    _MenuItem( icon: Icons.help_outline_rounded, label: 'Help & Support', onTap: () => context.push('/help-support')),
+                    _MenuItem(
+                        icon: Icons.help_outline_rounded,
+                        label: 'Help & Support',
+                        onTap: () => context.push('/help-support')),
                   ]),
-
                   const SizedBox(height: AppSizes.lg),
                   _menuSection(context, '', [
                     _MenuItem(
@@ -126,7 +159,8 @@ class ParentProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _menuSection(BuildContext context, String title, List<_MenuItem> items) {
+  Widget _menuSection(
+      BuildContext context, String title, List<_MenuItem> items) {
     final secondaryTextColor = context.appTextSecondary;
     final surfaceColor = context.appSurface;
     final borderColor = context.appBorder;
@@ -136,7 +170,11 @@ class ParentProfileScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (title.isNotEmpty) ...[
-          Text(title, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: secondaryTextColor)),
+          Text(title,
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium
+                  ?.copyWith(color: secondaryTextColor)),
           const SizedBox(height: AppSizes.sm),
         ],
         Container(
@@ -154,13 +192,20 @@ class ParentProfileScreen extends ConsumerWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: (item.color ?? AppColors.primary).withValues(alpha: 0.1),
+                      color: (item.color ?? AppColors.primary)
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
-                    child: Icon(item.icon, size: 18, color: item.color ?? AppColors.primary),
+                    child: Icon(item.icon,
+                        size: 18, color: item.color ?? AppColors.primary),
                   ),
-                  title: Text(item.label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: item.color)),
-                  trailing: Icon(Icons.chevron_right_rounded, size: 18, color: hintColor),
+                  title: Text(item.label,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: item.color)),
+                  trailing: Icon(Icons.chevron_right_rounded,
+                      size: 18, color: hintColor),
                   onTap: item.onTap,
                 ),
                 if (i < items.length - 1) const Divider(height: 1, indent: 56),
@@ -171,7 +216,6 @@ class ParentProfileScreen extends ConsumerWidget {
       ],
     );
   }
-
 }
 
 class _MenuItem {
@@ -179,5 +223,9 @@ class _MenuItem {
   final String label;
   final VoidCallback onTap;
   final Color? color;
-  const _MenuItem({required this.icon, required this.label, required this.onTap, this.color});
+  const _MenuItem(
+      {required this.icon,
+      required this.label,
+      required this.onTap,
+      this.color});
 }

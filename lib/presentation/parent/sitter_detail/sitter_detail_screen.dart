@@ -47,6 +47,7 @@ class _SitterDetailView extends StatelessWidget {
           SliverToBoxAdapter(child: _buildStats(context)),
           SliverToBoxAdapter(child: _buildAbout(context)),
           SliverToBoxAdapter(child: _buildServices(context)),
+          SliverToBoxAdapter(child: _buildCareLocations(context)),
           SliverToBoxAdapter(child: _buildSkills(context)),
           SliverToBoxAdapter(child: _buildAgeGroups(context)),
           SliverToBoxAdapter(child: _buildReviews(context)),
@@ -156,7 +157,7 @@ class _SitterDetailView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '\$${sitter.profile.hourlyRate.toInt()}/hr',
+                    'From \$${sitter.profile.startingHourlyRate.toStringAsFixed(0)}/hr',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w800,
@@ -265,6 +266,39 @@ class _SitterDetailView extends StatelessWidget {
             children: sitter.profile.services
                 .map((s) => Chip(label: Text(s.label)))
                 .toList(),
+          ),
+          const SizedBox(height: AppSizes.lg),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCareLocations(BuildContext context) {
+    final secondaryTextColor = context.appTextSecondary;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.pageHorizontal),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Care Arrangement', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: AppSizes.sm),
+          Wrap(
+            spacing: AppSizes.sm,
+            runSpacing: AppSizes.sm,
+            children: sitter.profile.supportedCareLocations
+                .map((location) => Chip(label: Text(location.label)))
+                .toList(),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          Text(
+            sitter.profile.transportFeePerKm > 0
+                ? 'Transport fee: \$${sitter.profile.transportFeePerKm.toStringAsFixed(2)}/km${sitter.profile.coverageRadiusKm != null ? ' • up to ${sitter.profile.coverageRadiusKm!.toStringAsFixed(0)} km' : ''}'
+                : 'No transport fee is charged for this sitter\'s available arrangements.',
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: secondaryTextColor),
           ),
           const SizedBox(height: AppSizes.lg),
         ],

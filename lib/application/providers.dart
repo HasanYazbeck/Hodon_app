@@ -39,7 +39,7 @@ final sitterRepositoryProvider = Provider<ISitterRepository>((ref) {
 });
 
 final bookingRepositoryProvider = Provider<IBookingRepository>((ref) {
-  return MockBookingRepository();
+  return MockBookingRepository(ref.watch(sitterRepositoryProvider));
 });
 
 final paymentRepositoryProvider = Provider<IPaymentRepository>((ref) {

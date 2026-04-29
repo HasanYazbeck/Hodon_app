@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,7 +34,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _locationCtrl = TextEditingController();
   DateTime? _dob;
   Gender? _gender;
+  double? _latitude;
+  double? _longitude;
   bool _isSaving = false;
+  bool _isDetectingLocation = false;
 
   @override
   void initState() {
@@ -42,6 +47,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     _locationCtrl.text = user?.address?.fullAddress ?? '';
     _dob = user?.dateOfBirth;
     _gender = user?.gender;
+    _latitude = user?.address?.latitude;
+    _longitude = user?.address?.longitude;
     _avatarBytes = _decodeAvatarDataUri(user?.avatarUrl);
   }
 
@@ -78,6 +85,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     final user = ref.read(currentUserProvider);
     if (user == null) return;
 
+    if (_locationCtrl.text.trim().isEmpty || !_hasValidLocationCoordinates) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please use current location to capture your geolocation before continuing.',
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
     final avatarDataUri = _avatarBytes != null
         ? 'data:image/jpeg;base64,${base64Encode(_avatarBytes!)}'
@@ -88,8 +106,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             id: user.address?.id ?? 'addr_${user.id}',
             label: user.address?.label ?? 'Home',
             fullAddress: _locationCtrl.text.trim(),
-            latitude: user.address?.latitude ?? 0,
-            longitude: user.address?.longitude ?? 0,
+            latitude: _latitude!,
+            longitude: _longitude!,
             isDefault: user.address?.isDefault ?? true,
           );
 
@@ -129,6 +147,72 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     }
   }
 
+  bool get _hasValidLocationCoordinates {
+    final lat = _latitude;
+    final lng = _longitude;
+    if (lat == null || lng == null) return false;
+    return !(lat == 0 && lng == 0);
+  }
+
+  Future<void> _useCurrentLocation() async {
+    setState(() => _isDetectingLocation = true);
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw Exception('Location permission is required.');
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+
+      var resolvedAddress =
+          '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}';
+      try {
+        final placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        if (placemarks.isNotEmpty) {
+          final place = placemarks.first;
+          final parts = [
+            place.street,
+            place.subLocality,
+            place.locality,
+            place.country,
+          ].where((e) => e != null && e.trim().isNotEmpty).toList();
+          if (parts.isNotEmpty) {
+            resolvedAddress = parts.join(', ');
+          }
+        }
+      } catch (_) {
+        // Keep coordinate fallback if reverse geocoding fails.
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+        _locationCtrl.text = resolvedAddress;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isDetectingLocation = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,6 +241,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   _LocationPage(
                     locationCtrl: _locationCtrl,
                     isSaving: _isSaving,
+                    hasValidCoordinates: _hasValidLocationCoordinates,
+                    isDetectingLocation: _isDetectingLocation,
+                    onDetectLocation: _isSaving ? null : _useCurrentLocation,
                     onNext: _isSaving ? null : _nextPage,
                   ),
                 ],
@@ -309,9 +396,19 @@ class _PersonalInfoPage extends StatelessWidget {
 class _LocationPage extends StatelessWidget {
   final TextEditingController locationCtrl;
   final VoidCallback? onNext;
+  final Future<void> Function()? onDetectLocation;
   final bool isSaving;
+  final bool isDetectingLocation;
+  final bool hasValidCoordinates;
 
-  const _LocationPage({required this.locationCtrl, required this.onNext, this.isSaving = false});
+  const _LocationPage({
+    required this.locationCtrl,
+    required this.onNext,
+    required this.onDetectLocation,
+    required this.isDetectingLocation,
+    required this.hasValidCoordinates,
+    this.isSaving = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -335,13 +432,32 @@ class _LocationPage extends StatelessWidget {
           ),
           const SizedBox(height: AppSizes.md),
           OutlinedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.my_location_rounded),
-            label: const Text(AppStrings.useCurrentLocation),
+            onPressed: isDetectingLocation ? null : onDetectLocation,
+            icon: isDetectingLocation
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.my_location_rounded),
+            label: Text(
+              isDetectingLocation
+                  ? 'Detecting location...'
+                  : AppStrings.useCurrentLocation,
+            ),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
             ),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          Text(
+            hasValidCoordinates
+                ? 'Geolocation captured successfully.'
+                : 'Geolocation is required to complete signup.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: hasValidCoordinates ? AppColors.success : AppColors.error,
+                ),
           ),
           const Spacer(),
           AppButton(

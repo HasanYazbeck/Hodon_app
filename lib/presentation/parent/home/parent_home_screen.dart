@@ -18,7 +18,7 @@ class ParentHomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final activeBookingsAsync = ref.watch(activeParentBookingsProvider);
+    final upcomingBookingsAsync = ref.watch(upcomingParentBookingsProvider);
 
     final greeting = _greeting();
     final backgroundColor = context.appBackground;
@@ -27,10 +27,12 @@ class ParentHomeScreen extends ConsumerWidget {
       backgroundColor: backgroundColor,
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () async => ref.invalidate(activeParentBookingsProvider),
+          onRefresh: () async => ref.invalidate(upcomingParentBookingsProvider),
           child: CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(child: _buildHeader(context, greeting, user?.firstName ?? '')),
+              SliverToBoxAdapter(
+                  child:
+                      _buildHeader(context, greeting, user?.firstName ?? '')),
               SliverToBoxAdapter(child: _buildEmergencyBanner(context)),
               SliverToBoxAdapter(child: _buildQuickActions(context)),
               SliverToBoxAdapter(
@@ -46,8 +48,9 @@ class ParentHomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              activeBookingsAsync.when(
-                loading: () => const SliverToBoxAdapter(child: _BookingsShimmer()),
+              upcomingBookingsAsync.when(
+                loading: () =>
+                    const SliverToBoxAdapter(child: _BookingsShimmer()),
                 error: (e, _) => SliverToBoxAdapter(
                   child: Center(child: Text(e.toString())),
                 ),
@@ -98,7 +101,8 @@ class ParentHomeScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXl)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXl)),
       ),
       builder: (context) => Container(
         padding: const EdgeInsets.all(AppSizes.md),
@@ -185,7 +189,8 @@ class ParentHomeScreen extends ConsumerWidget {
 
   void _callSupport(BuildContext context) async {
     try {
-      await CommunicationService.makePhoneCall(CommunicationService.supportPhone);
+      await CommunicationService.makePhoneCall(
+          CommunicationService.supportPhone);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -217,7 +222,10 @@ class ParentHomeScreen extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        AppSizes.pageHorizontal, AppSizes.lg, AppSizes.pageHorizontal, AppSizes.sm,
+        AppSizes.pageHorizontal,
+        AppSizes.lg,
+        AppSizes.pageHorizontal,
+        AppSizes.sm,
       ),
       child: Row(
         children: [
@@ -318,7 +326,8 @@ class ParentHomeScreen extends ConsumerWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                child: const Icon(Icons.arrow_forward_rounded,
+                    color: Colors.white, size: 20),
               ),
             ],
           ),
@@ -478,8 +487,20 @@ class _BookingCard extends StatelessWidget {
   }
 
   String _formatDateTime(DateTime dt) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     final h = dt.hour > 12 ? dt.hour - 12 : dt.hour;
     final ampm = dt.hour >= 12 ? 'PM' : 'AM';
     return '${months[dt.month - 1]} ${dt.day} · ${h.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')} $ampm';

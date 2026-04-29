@@ -24,17 +24,24 @@ class BookingRequestScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(sitterBookingsProvider);
     final actionState = ref.watch(bookingActionProvider);
+    final historyAsync =
+        ref.watch(parentChildHistoryOverviewProvider(bookingId));
 
     return bookingsAsync.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(body: Center(child: Text(e.toString()))),
       data: (bookings) {
         final booking = bookings.where((b) => b.id == bookingId).firstOrNull;
-        if (booking == null) return const Scaffold(body: Center(child: Text('Not found')));
+        if (booking == null) {
+          return const Scaffold(body: Center(child: Text('Not found')));
+        }
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(booking.isEmergency ? '⚡ Emergency Request' : 'Booking Request'),
+            title: Text(booking.isEmergency
+                ? '⚡ Emergency Request'
+                : 'Booking Request'),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => _backToPreviousOrBookings(context),
@@ -47,26 +54,43 @@ class BookingRequestScreen extends ConsumerWidget {
               children: [
                 _InfoRow('Service', booking.serviceType.label),
                 _InfoRow('Type', booking.bookingType.label),
+                _InfoRow('Care Arrangement', booking.careLocationType.label),
                 _InfoRow('Date & Time', _fmtDate(booking.startDatetime)),
-                _InfoRow('Duration', '${booking.durationHours.toStringAsFixed(1)} hours'),
+                _InfoRow('Duration',
+                    '${booking.durationHours.toStringAsFixed(1)} hours'),
                 _InfoRow('Location', booking.location.fullAddress),
-                _InfoRow('Earnings', '\$${(booking.pricing.hourlyRate * booking.durationHours).toStringAsFixed(2)}'),
+                _InfoRow('Earnings',
+                    '\$${(booking.pricing.subtotal + booking.pricing.transportFee).toStringAsFixed(2)}'),
+                if (booking.pricing.transportFee > 0)
+                  _InfoRow(
+                    'Transport Fee',
+                    '\$${booking.pricing.transportFee.toStringAsFixed(2)} for ${booking.transportDistanceKm.toStringAsFixed(1)} km',
+                  ),
                 if (booking.notes != null) _InfoRow('Notes', booking.notes!),
+                _HistoryOverviewCard(historyAsync: historyAsync),
                 const SizedBox(height: AppSizes.xl),
                 if (booking.status == BookingStatus.pending) ...[
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: actionState is AsyncLoading ? null : () async {
-                            await ref.read(bookingActionProvider.notifier).reject(bookingId, 'Not available');
-                            if (context.mounted) _backToPreviousOrBookings(context);
-                          },
+                          onPressed: actionState is AsyncLoading
+                              ? null
+                              : () async {
+                                  await ref
+                                      .read(bookingActionProvider.notifier)
+                                      .reject(bookingId, 'Not available');
+                                  if (context.mounted) {
+                                    _backToPreviousOrBookings(context);
+                                  }
+                                },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.error,
                             side: const BorderSide(color: AppColors.error),
                             minimumSize: const Size(0, AppSizes.buttonHeight),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppSizes.radiusLg)),
                           ),
                           child: const Text('Decline'),
                         ),
@@ -75,47 +99,79 @@ class BookingRequestScreen extends ConsumerWidget {
                       Expanded(
                         flex: 2,
                         child: ElevatedButton(
-                          onPressed: actionState is AsyncLoading ? null : () async {
-                            await ref.read(bookingActionProvider.notifier).accept(bookingId);
-                            if (context.mounted) _backToPreviousOrBookings(context);
-                          },
+                          onPressed: actionState is AsyncLoading
+                              ? null
+                              : () async {
+                                  await ref
+                                      .read(bookingActionProvider.notifier)
+                                      .accept(bookingId);
+                                  if (context.mounted) {
+                                    _backToPreviousOrBookings(context);
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(0, AppSizes.buttonHeight),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppSizes.radiusLg)),
                           ),
                           child: actionState is AsyncLoading
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2, color: Colors.white))
                               : const Text('Accept Job'),
                         ),
                       ),
                     ],
                   ),
-                ] else if (booking.status == BookingStatus.accepted || booking.status == BookingStatus.parentConfirmed) ...[
+                ] else if (booking.status == BookingStatus.accepted ||
+                    booking.status == BookingStatus.parentConfirmed) ...[
                   ElevatedButton.icon(
-                    onPressed: actionState is AsyncLoading ? null : () async {
-                      await ref.read(bookingActionProvider.notifier).checkIn(bookingId);
-                      if (context.mounted) ref.invalidate(sitterBookingsProvider);
-                    },
+                    onPressed: actionState is AsyncLoading
+                        ? null
+                        : () async {
+                            await ref
+                                .read(bookingActionProvider.notifier)
+                                .checkIn(bookingId);
+                            if (context.mounted) {
+                              ref.invalidate(sitterBookingsProvider);
+                            }
+                          },
                     icon: const Icon(Icons.login_rounded),
                     label: const Text('Check In'),
                     style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
+                      minimumSize:
+                          const Size(double.infinity, AppSizes.buttonHeight),
                       backgroundColor: AppColors.success,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusLg)),
                     ),
                   ),
-                ] else if (booking.status == BookingStatus.checkedIn || booking.status == BookingStatus.inProgress) ...[
+                ] else if (booking.status == BookingStatus.checkedIn ||
+                    booking.status == BookingStatus.inProgress) ...[
                   ElevatedButton.icon(
-                    onPressed: actionState is AsyncLoading ? null : () async {
-                      await ref.read(bookingActionProvider.notifier).checkOut(bookingId);
-                      if (context.mounted) ref.invalidate(sitterBookingsProvider);
-                    },
+                    onPressed: actionState is AsyncLoading
+                        ? null
+                        : () async {
+                            await ref
+                                .read(bookingActionProvider.notifier)
+                                .checkOut(bookingId);
+                            if (context.mounted) {
+                              ref.invalidate(sitterBookingsProvider);
+                            }
+                          },
                     icon: const Icon(Icons.logout_rounded),
                     label: const Text('Check Out'),
                     style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
+                      minimumSize:
+                          const Size(double.infinity, AppSizes.buttonHeight),
                       backgroundColor: AppColors.warning,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusLg)),
                     ),
                   ),
                 ],
@@ -128,7 +184,20 @@ class BookingRequestScreen extends ConsumerWidget {
   }
 
   String _fmtDate(DateTime dt) {
-    final months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
     final ampm = dt.hour >= 12 ? 'PM' : 'AM';
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year} · $h:${dt.minute.toString().padLeft(2, '0')} $ampm';
@@ -144,17 +213,69 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: AppSizes.sm),
         child: HodonCard(
-          padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.md, vertical: AppSizes.sm),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
                 width: 90,
-                child: Text(label, style: Theme.of(context).textTheme.labelMedium),
+                child:
+                    Text(label, style: Theme.of(context).textTheme.labelMedium),
               ),
-              Expanded(child: Text(value, style: Theme.of(context).textTheme.bodyMedium)),
+              Expanded(
+                  child: Text(value,
+                      style: Theme.of(context).textTheme.bodyMedium)),
             ],
           ),
         ),
       );
+}
+
+class _HistoryOverviewCard extends StatelessWidget {
+  final AsyncValue<ParentChildHistoryOverview?> historyAsync;
+
+  const _HistoryOverviewCard({required this.historyAsync});
+
+  @override
+  Widget build(BuildContext context) {
+    return historyAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.only(bottom: AppSizes.sm),
+        child: HodonCard(
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: SizedBox(
+              height: 18,
+              width: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            title: Text('Loading family history...'),
+          ),
+        ),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (history) {
+        if (history == null) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSizes.sm),
+          child: HodonCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Parent / Child History',
+                    style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: AppSizes.sm),
+                Text(
+                    'Previous requests from this parent: ${history.totalJobsFromParent}'),
+                Text(
+                    'Completed jobs with this parent: ${history.completedJobsFromParent}'),
+                Text('Children seen before: ${history.repeatChildrenCount}'),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

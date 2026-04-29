@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/booking.dart';
 import '../../domain/models/user.dart';
 import '../../domain/enums/booking_status.dart';
+import '../../domain/enums/user_role.dart';
 import '../../domain/enums/app_enums.dart';
+import '../auth/auth_provider.dart';
 import '../providers.dart';
 
 // ── Booking list ───────────────────────────────────────────────────────────
@@ -12,17 +14,80 @@ final parentBookingsProvider = FutureProvider<List<Booking>>((ref) async {
 });
 
 final sitterBookingsProvider = FutureProvider<List<Booking>>((ref) async {
-  return ref.watch(bookingRepositoryProvider).getSitterBookings();
+  final user = ref.watch(currentUserProvider);
+  if (user == null || user.role != UserRole.babysitter) return const [];
+  return ref
+      .watch(bookingRepositoryProvider)
+      .getSitterBookings(sitterId: user.id);
+});
+
+final upcomingParentBookingsProvider =
+    FutureProvider<List<Booking>>((ref) async {
+  final all = await ref.watch(bookingRepositoryProvider).getParentBookings();
+  return all
+      .where((b) =>
+          b.status == BookingStatus.pending ||
+          b.status == BookingStatus.accepted ||
+          b.status == BookingStatus.parentConfirmed)
+      .toList();
 });
 
 final activeParentBookingsProvider = FutureProvider<List<Booking>>((ref) async {
+  // Kept for backward compatibility where active-only jobs are needed.
   final all = await ref.watch(bookingRepositoryProvider).getParentBookings();
   return all.where((b) => b.status.isActive).toList();
 });
 
 final activeSitterBookingProvider = FutureProvider<Booking?>((ref) async {
-  final all = await ref.watch(bookingRepositoryProvider).getSitterBookings();
+  final user = ref.watch(currentUserProvider);
+  if (user == null || user.role != UserRole.babysitter) return null;
+  final all = await ref
+      .watch(bookingRepositoryProvider)
+      .getSitterBookings(sitterId: user.id);
   return all.where((b) => b.status.isActive).firstOrNull;
+});
+
+class ParentChildHistoryOverview {
+  final int totalJobsFromParent;
+  final int completedJobsFromParent;
+  final int repeatChildrenCount;
+
+  const ParentChildHistoryOverview({
+    required this.totalJobsFromParent,
+    required this.completedJobsFromParent,
+    required this.repeatChildrenCount,
+  });
+}
+
+final parentChildHistoryOverviewProvider =
+    FutureProvider.family<ParentChildHistoryOverview?, String>(
+        (ref, bookingId) async {
+  final bookings = await ref.watch(sitterBookingsProvider.future);
+  final booking = bookings.where((b) => b.id == bookingId).firstOrNull;
+  if (booking == null) return null;
+
+  final sameParent =
+      bookings.where((b) => b.parentId == booking.parentId).toList();
+  final historicalSameParent =
+      sameParent.where((b) => b.id != booking.id).toList();
+  final completed = sameParent
+      .where((b) =>
+          b.status == BookingStatus.completed ||
+          b.status == BookingStatus.rated)
+      .length;
+
+  final childIdsSeen = <String>{};
+  for (final b in historicalSameParent) {
+    childIdsSeen.addAll(b.childrenIds);
+  }
+  final repeatedChildren =
+      booking.childrenIds.where((id) => childIdsSeen.contains(id)).length;
+
+  return ParentChildHistoryOverview(
+    totalJobsFromParent: sameParent.length,
+    completedJobsFromParent: completed,
+    repeatChildrenCount: repeatedChildren,
+  );
 });
 
 // ── Create booking form state ──────────────────────────────────────────────
@@ -31,6 +96,7 @@ class CreateBookingFormState {
   final String sitterId;
   final List<String> childrenIds;
   final ServiceType serviceType;
+  final CareLocationType careLocationType;
   final BookingType bookingType;
   final DateTime? startDatetime;
   final DateTime? endDatetime;
@@ -46,6 +112,7 @@ class CreateBookingFormState {
     required this.sitterId,
     this.childrenIds = const [],
     this.serviceType = ServiceType.babysitting,
+    this.careLocationType = CareLocationType.parentHomeVisit,
     this.bookingType = BookingType.scheduled,
     this.startDatetime,
     this.endDatetime,
@@ -61,6 +128,7 @@ class CreateBookingFormState {
   CreateBookingFormState copyWith({
     List<String>? childrenIds,
     ServiceType? serviceType,
+    CareLocationType? careLocationType,
     BookingType? bookingType,
     DateTime? startDatetime,
     DateTime? endDatetime,
@@ -76,6 +144,7 @@ class CreateBookingFormState {
         sitterId: sitterId,
         childrenIds: childrenIds ?? this.childrenIds,
         serviceType: serviceType ?? this.serviceType,
+        careLocationType: careLocationType ?? this.careLocationType,
         bookingType: bookingType ?? this.bookingType,
         startDatetime: startDatetime ?? this.startDatetime,
         endDatetime: endDatetime ?? this.endDatetime,
@@ -107,20 +176,26 @@ class CreateBookingNotifier extends StateNotifier<CreateBookingFormState> {
 
   final Ref _ref;
 
-  void setChildren(List<String> ids) => state = state.copyWith(childrenIds: ids);
+  void setChildren(List<String> ids) =>
+      state = state.copyWith(childrenIds: ids);
   void setServiceType(ServiceType t) => state = state.copyWith(serviceType: t);
+  void setCareLocationType(CareLocationType t) =>
+      state = state.copyWith(careLocationType: t);
   void setBookingType(BookingType t) => state = state.copyWith(bookingType: t);
   void setStart(DateTime dt) => state = state.copyWith(startDatetime: dt);
   void setEnd(DateTime dt) => state = state.copyWith(endDatetime: dt);
   void setLocation(UserAddress a) => state = state.copyWith(location: a);
-  void setPaymentMethod(PaymentMethod m) => state = state.copyWith(paymentMethod: m);
+  void setPaymentMethod(PaymentMethod m) =>
+      state = state.copyWith(paymentMethod: m);
   void setNotes(String n) => state = state.copyWith(notes: n);
   void setUseTrustCircle(bool v) => state = state.copyWith(useTrustCircle: v);
 
   Future<void> _loadDefaultPaymentMethod() async {
     try {
-      final methods = await _ref.read(paymentRepositoryProvider).getPaymentMethods();
-      final defaultMethod = methods.where((method) => method.isDefault).firstOrNull;
+      final methods =
+          await _ref.read(paymentRepositoryProvider).getPaymentMethods();
+      final defaultMethod =
+          methods.where((method) => method.isDefault).firstOrNull;
       if (!mounted || defaultMethod == null) return;
       state = state.copyWith(paymentMethod: defaultMethod.type);
     } catch (_) {
@@ -129,7 +204,9 @@ class CreateBookingNotifier extends StateNotifier<CreateBookingFormState> {
   }
 
   Future<bool> submit() async {
-    if (state.startDatetime == null || state.endDatetime == null || state.location == null) {
+    if (state.startDatetime == null ||
+        state.endDatetime == null ||
+        state.location == null) {
       state = state.copyWith(error: 'Please fill all required fields.');
       return false;
     }
@@ -140,6 +217,7 @@ class CreateBookingNotifier extends StateNotifier<CreateBookingFormState> {
         sitterId: state.sitterId,
         childrenIds: state.childrenIds,
         serviceType: state.serviceType,
+        careLocationType: state.careLocationType,
         bookingType: state.bookingType,
         startDatetime: state.startDatetime!,
         endDatetime: state.endDatetime!,
@@ -151,6 +229,7 @@ class CreateBookingNotifier extends StateNotifier<CreateBookingFormState> {
       state = state.copyWith(isSubmitting: false, result: booking);
       // Invalidate booking lists
       _ref.invalidate(parentBookingsProvider);
+      _ref.invalidate(upcomingParentBookingsProvider);
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -185,13 +264,19 @@ class BookingActionNotifier extends StateNotifier<AsyncValue<void>> {
       });
 
   Future<bool> reject(String bookingId, String reason) => _act(() async {
-        await _ref.read(bookingRepositoryProvider).rejectBooking(bookingId, reason);
+        await _ref
+            .read(bookingRepositoryProvider)
+            .rejectBooking(bookingId, reason);
         _ref.invalidate(sitterBookingsProvider);
       });
 
   Future<bool> cancel(String bookingId, String reason) => _act(() async {
-        await _ref.read(bookingRepositoryProvider).cancelBooking(bookingId, reason);
+        await _ref
+            .read(bookingRepositoryProvider)
+            .cancelBooking(bookingId, reason);
         _ref.invalidate(parentBookingsProvider);
+        _ref.invalidate(upcomingParentBookingsProvider);
+        _ref.invalidate(activeParentBookingsProvider);
         _ref.invalidate(sitterBookingsProvider);
       });
 
@@ -219,4 +304,3 @@ class BookingActionNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 }
-

@@ -37,6 +37,7 @@ import '../../presentation/babysitter/earnings/earnings_screen.dart';
 import '../../presentation/shared/chat/chat_list_screen.dart';
 import '../../presentation/shared/notifications/notifications_screen.dart';
 import '../../presentation/shared/settings/settings_screen.dart';
+import '../../presentation/shared/settings/terms_and_conditions_screen.dart';
 import '../../presentation/shared/support/help_support_screen.dart';
 import '../../presentation/shared/support/contact_us_screen.dart';
 import '../../presentation/shared/support/report_bug_screen.dart';
@@ -64,6 +65,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authProvider);
       final location = state.matchedLocation;
+      const profileSetupPath = '/profile-setup';
 
       if (authState is AuthInitial || authState is AuthLoading) {
         return location == '/splash' ? null : '/splash';
@@ -71,7 +73,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       final isAuthenticated = authState is AuthAuthenticated;
       final needsOtp = authState is AuthOtpRequired;
-      final publicRoutes = ['/onboarding', '/login', '/register', '/forgot-password'];
+      final publicRoutes = [
+        '/onboarding',
+        '/login',
+        '/register',
+        '/forgot-password'
+      ];
       final isPublicRoute = publicRoutes.any((r) => location.startsWith(r));
 
       if (needsOtp && !location.startsWith('/otp')) return '/otp';
@@ -80,20 +87,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/onboarding';
       }
 
-      if (!isAuthenticated && !isPublicRoute && !location.startsWith('/otp') && location != '/splash') {
+      if (!isAuthenticated &&
+          !isPublicRoute &&
+          !location.startsWith('/otp') &&
+          location != '/splash') {
         return '/login';
       }
 
-      if (isAuthenticated) {
+      if (authState case AuthAuthenticated(:final user)) {
+        final needsProfileSetup =
+            !user.isProfileComplete || !user.hasValidGeolocation;
+
+        if (needsProfileSetup &&
+            location != profileSetupPath &&
+            !location.startsWith('/otp')) {
+          return profileSetupPath;
+        }
+
         if (isPublicRoute || location == '/splash') {
-          final user = authState.user;
           if (!user.isEmailVerified) return '/otp';
-          if (!user.isProfileComplete) {
-            return user.role == UserRole.parent
-                ? '/parent/onboarding'
-                : '/babysitter/onboarding';
-          }
-          return user.role == UserRole.parent ? '/parent/home' : '/babysitter/home';
+          if (needsProfileSetup) return profileSetupPath;
+          return user.role == UserRole.parent
+              ? '/parent/home'
+              : '/babysitter/home';
         }
       }
 
@@ -101,7 +117,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
-      GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
+      GoRoute(
+          path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
       GoRoute(
@@ -111,20 +128,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return OtpScreen(email: email);
         },
       ),
-      GoRoute(path: '/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
-      GoRoute(path: '/role-selection', builder: (_, __) => const RoleSelectionScreen()),
-      GoRoute(path: '/profile-setup', builder: (_, __) => const ProfileSetupScreen()),
-      GoRoute(path: '/help-support', builder: (_, __) => const HelpSupportScreen()),
+      GoRoute(
+          path: '/forgot-password',
+          builder: (_, __) => const ForgotPasswordScreen()),
+      GoRoute(
+          path: '/role-selection',
+          builder: (_, __) => const RoleSelectionScreen()),
+      GoRoute(
+          path: '/profile-setup',
+          builder: (_, __) => const ProfileSetupScreen()),
+      GoRoute(
+        path: '/terms-and-conditions',
+        builder: (_, __) => const TermsAndConditionsScreen(),
+      ),
+      GoRoute(
+          path: '/help-support', builder: (_, __) => const HelpSupportScreen()),
       GoRoute(path: '/contact-us', builder: (_, __) => const ContactUsScreen()),
       GoRoute(path: '/report-bug', builder: (_, __) => const ReportBugScreen()),
 
       // Parent shell
       ShellRoute(
-        builder: (context, state, child) => ParentShell(state: state, child: child),
+        builder: (context, state, child) =>
+            ParentShell(state: state, child: child),
         routes: [
-          GoRoute(path: '/parent/home', builder: (_, __) => const ParentHomeScreen()),
-          GoRoute(path: '/parent/search', builder: (_, __) => const SearchScreen()),
-          GoRoute(path: '/parent/bookings', builder: (_, __) => const BookingListScreen()),
+          GoRoute(
+              path: '/parent/home',
+              builder: (_, __) => const ParentHomeScreen()),
+          GoRoute(
+              path: '/parent/search', builder: (_, __) => const SearchScreen()),
+          GoRoute(
+              path: '/parent/bookings',
+              builder: (_, __) => const BookingListScreen()),
           GoRoute(
             path: '/parent/sitter/:sitterId',
             builder: (_, state) => SitterDetailScreen(
@@ -143,59 +177,125 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               bookingId: state.pathParameters['bookingId']!,
             ),
           ),
-          GoRoute(path: '/parent/children', builder: (_, __) => const ChildrenScreen()),
-          GoRoute(path: '/parent/add-child', builder: (_, __) => const AddChildScreen()),
+          GoRoute(
+              path: '/parent/children',
+              builder: (_, __) => const ChildrenScreen()),
+          GoRoute(
+              path: '/parent/add-child',
+              builder: (_, __) => const AddChildScreen()),
           GoRoute(
             path: '/parent/edit-child/:childId',
             builder: (_, state) => AddChildScreen(
               childId: state.pathParameters['childId']!,
             ),
           ),
-          GoRoute(path: '/parent/payment-methods', builder: (_, __) => const PaymentMethodsScreen()),
-          GoRoute(path: '/parent/trust-circle', builder: (_, __) => const TrustCircleScreen()),
-          GoRoute(path: '/parent/profile', builder: (_, __) => const ParentProfileScreen()),
-          GoRoute(path: '/parent/edit-profile', builder: (_, __) => const ProfileSetupScreen()),
-          GoRoute(path: '/parent/onboarding', builder: (_, __) => const ProfileSetupScreen()),
-          GoRoute(path: '/parent/chat', builder: (_, __) => const ChatListScreen()),
+          GoRoute(
+              path: '/parent/payment-methods',
+              builder: (_, __) => const PaymentMethodsScreen()),
+          GoRoute(
+            path: '/parent/terms-and-conditions',
+            builder: (_, state) {
+              final requireAcceptance =
+                  state.uri.queryParameters['requireAcceptance'] == 'true';
+              return TermsAndConditionsScreen(
+                requireAcceptance: requireAcceptance,
+              );
+            },
+          ),
+          GoRoute(
+              path: '/parent/trust-circle',
+              builder: (_, __) => const TrustCircleScreen()),
+          GoRoute(
+              path: '/parent/profile',
+              builder: (_, __) => const ParentProfileScreen()),
+          GoRoute(
+              path: '/parent/edit-profile',
+              builder: (_, __) => const ProfileSetupScreen()),
+          GoRoute(
+              path: '/parent/onboarding',
+              builder: (_, __) => const ProfileSetupScreen()),
+          GoRoute(
+              path: '/parent/chat', builder: (_, __) => const ChatListScreen()),
           GoRoute(
             path: '/chat/:conversationId',
             builder: (_, state) => ChatScreen(
               conversationId: state.pathParameters['conversationId']!,
             ),
           ),
-          GoRoute(path: '/parent/notifications', builder: (_, __) => const NotificationsScreen()),
-          GoRoute(path: '/parent/settings', builder: (_, __) => const SettingsScreen()),
+          GoRoute(
+              path: '/parent/notifications',
+              builder: (_, __) => const NotificationsScreen()),
+          GoRoute(
+              path: '/parent/settings',
+              builder: (_, __) => const SettingsScreen()),
         ],
       ),
 
       // Babysitter shell
       ShellRoute(
-        builder: (context, state, child) => SitterShell(state: state, child: child),
+        builder: (context, state, child) =>
+            SitterShell(state: state, child: child),
         routes: [
-          GoRoute(path: '/babysitter/home', builder: (_, __) => const BabysitterHomeScreen()),
-          GoRoute(path: '/babysitter/bookings', builder: (_, __) => const SitterBookingsScreen()),
+          GoRoute(
+              path: '/babysitter/home',
+              builder: (_, __) => const BabysitterHomeScreen()),
+          GoRoute(
+              path: '/babysitter/bookings',
+              builder: (_, __) => const SitterBookingsScreen()),
           GoRoute(
             path: '/babysitter/booking-request/:bookingId',
             builder: (_, state) => BookingRequestScreen(
               bookingId: state.pathParameters['bookingId']!,
             ),
           ),
-          GoRoute(path: '/babysitter/profile', builder: (_, __) => const SitterProfileScreen()),
-          GoRoute(path: '/babysitter/verification', builder: (_, __) => const VerificationCenterScreen()),
-          GoRoute(path: '/babysitter/verification/id', builder: (_, __) => const IdVerificationScreen()),
-          GoRoute(path: '/babysitter/verification/selfie', builder: (_, __) => const SelfieVerificationScreen()),
-          GoRoute(path: '/babysitter/verification/background-check', builder: (_, __) => const BackgroundCheckScreen()),
-          GoRoute(path: '/babysitter/verification/cpr', builder: (_, __) => const CprCertificationScreen()),
-          GoRoute(path: '/babysitter/verification/first-aid', builder: (_, __) => const FirstAidCertificateScreen()),
-          GoRoute(path: '/babysitter/reviews', builder: (_, __) => const MyReviewsScreen()),
-          GoRoute(path: '/babysitter/availability', builder: (_, __) => const AvailabilityScreen()),
-          GoRoute(path: '/babysitter/rates-services', builder: (_, __) => const RatesServicesScreen()),
-          GoRoute(path: '/babysitter/edit-profile', builder: (_, __) => const ProfileSetupScreen()),
-          GoRoute(path: '/babysitter/onboarding', builder: (_, __) => const SitterOnboardingScreen()),
-          GoRoute(path: '/babysitter/earnings', builder: (_, __) => const EarningsScreen()),
-          GoRoute(path: '/babysitter/chat', builder: (_, __) => const ChatListScreen()),
-          GoRoute(path: '/babysitter/notifications', builder: (_, __) => const BabysitterNotificationsScreen()),
-          GoRoute(path: '/babysitter/settings', builder: (_, __) => const SettingsScreen()),
+          GoRoute(
+              path: '/babysitter/profile',
+              builder: (_, __) => const SitterProfileScreen()),
+          GoRoute(
+              path: '/babysitter/verification',
+              builder: (_, __) => const VerificationCenterScreen()),
+          GoRoute(
+              path: '/babysitter/verification/id',
+              builder: (_, __) => const IdVerificationScreen()),
+          GoRoute(
+              path: '/babysitter/verification/selfie',
+              builder: (_, __) => const SelfieVerificationScreen()),
+          GoRoute(
+              path: '/babysitter/verification/background-check',
+              builder: (_, __) => const BackgroundCheckScreen()),
+          GoRoute(
+              path: '/babysitter/verification/cpr',
+              builder: (_, __) => const CprCertificationScreen()),
+          GoRoute(
+              path: '/babysitter/verification/first-aid',
+              builder: (_, __) => const FirstAidCertificateScreen()),
+          GoRoute(
+              path: '/babysitter/reviews',
+              builder: (_, __) => const MyReviewsScreen()),
+          GoRoute(
+              path: '/babysitter/availability',
+              builder: (_, __) => const AvailabilityScreen()),
+          GoRoute(
+              path: '/babysitter/rates-services',
+              builder: (_, __) => const RatesServicesScreen()),
+          GoRoute(
+              path: '/babysitter/edit-profile',
+              builder: (_, __) => const ProfileSetupScreen()),
+          GoRoute(
+              path: '/babysitter/onboarding',
+              builder: (_, __) => const SitterOnboardingScreen()),
+          GoRoute(
+              path: '/babysitter/earnings',
+              builder: (_, __) => const EarningsScreen()),
+          GoRoute(
+              path: '/babysitter/chat',
+              builder: (_, __) => const ChatListScreen()),
+          GoRoute(
+              path: '/babysitter/notifications',
+              builder: (_, __) => const BabysitterNotificationsScreen()),
+          GoRoute(
+              path: '/babysitter/settings',
+              builder: (_, __) => const SettingsScreen()),
         ],
       ),
     ],
@@ -218,10 +318,14 @@ class ParentShell extends StatelessWidget {
       state: state,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: 'Search'),
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: 'Bookings'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded), label: 'Chat'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.search_rounded), label: 'Search'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today_rounded), label: 'Bookings'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_rounded), label: 'Chat'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.person_rounded), label: 'Profile'),
       ],
       routes: [
         '/parent/home',
@@ -247,9 +351,12 @@ class SitterShell extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.work_rounded), label: 'Jobs'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded), label: 'Chat'),
-        BottomNavigationBarItem(icon: Icon(Icons.attach_money_rounded), label: 'Earnings'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_rounded), label: 'Chat'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.attach_money_rounded), label: 'Earnings'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.person_rounded), label: 'Profile'),
       ],
       routes: [
         '/babysitter/home',
@@ -296,4 +403,3 @@ class _AppShell extends StatelessWidget {
     );
   }
 }
-

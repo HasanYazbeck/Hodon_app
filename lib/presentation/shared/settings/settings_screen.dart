@@ -22,7 +22,10 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(AppSizes.pageHorizontal),
         children: [
           _Section(title: 'Preferences', items: [
-            _SettingsItem(icon: Icons.language_rounded, label: 'Language', trailing: const Text('English')),
+            _SettingsItem(
+                icon: Icons.language_rounded,
+                label: 'Language',
+                trailing: const Text('English')),
             _SettingsItem(
               icon: Icons.dark_mode_rounded,
               label: 'Dark Mode',
@@ -34,7 +37,10 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
             ),
-            _SettingsItem(icon: Icons.notifications_rounded, label: 'Push Notifications', trailing: const Switch(value: true, onChanged: null)),
+            _SettingsItem(
+                icon: Icons.notifications_rounded,
+                label: 'Push Notifications',
+                trailing: const Switch(value: true, onChanged: null)),
           ]),
           // const SizedBox(height: AppSizes.md),
           // _Section(title: 'Support', items: [
@@ -48,8 +54,14 @@ class SettingsScreen extends ConsumerWidget {
           // ]),
           const SizedBox(height: AppSizes.md),
           _Section(title: 'Legal', items: [
-            _SettingsItem(icon: Icons.description_outlined, label: 'Terms of Service', onTap: () {}),
-            _SettingsItem(icon: Icons.privacy_tip_outlined, label: 'Privacy Policy', onTap: () {}),
+            _SettingsItem(
+                icon: Icons.description_outlined,
+                label: 'Terms of Service',
+                onTap: () => context.push('/terms-and-conditions')),
+            _SettingsItem(
+                icon: Icons.privacy_tip_outlined,
+                label: 'Privacy Policy',
+                onTap: () {}),
           ]),
           const SizedBox(height: AppSizes.md),
           _Section(items: [
@@ -69,7 +81,10 @@ class SettingsScreen extends ConsumerWidget {
           Center(
             child: Text(
               'Hodon v1.0.0\nMade with ❤️ in Lebanon',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: hintColor),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: hintColor),
               textAlign: TextAlign.center,
             ),
           ),
@@ -97,7 +112,11 @@ class _Section extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (title != null) ...[
-          Text(title!, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: secondaryTextColor)),
+          Text(title!,
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium
+                  ?.copyWith(color: secondaryTextColor)),
           const SizedBox(height: AppSizes.sm),
         ],
         Container(
@@ -115,13 +134,23 @@ class _Section extends StatelessWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: (item.color ?? AppColors.primary).withValues(alpha: 0.1),
+                      color: (item.color ?? AppColors.primary)
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
-                    child: Icon(item.icon, size: 18, color: item.color ?? AppColors.primary),
+                    child: Icon(item.icon,
+                        size: 18, color: item.color ?? AppColors.primary),
                   ),
-                  title: Text(item.label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: item.color)),
-                  trailing: item.trailing ?? (item.onTap != null ? Icon(Icons.chevron_right_rounded, size: 18, color: hintColor) : null),
+                  title: Text(item.label,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: item.color)),
+                  trailing: item.trailing ??
+                      (item.onTap != null
+                          ? Icon(Icons.chevron_right_rounded,
+                              size: 18, color: hintColor)
+                          : null),
                   onTap: item.onTap,
                 ),
                 if (!isLast) const Divider(height: 1, indent: 56),
@@ -141,5 +170,10 @@ class _SettingsItem {
   final VoidCallback? onTap;
   final Color? color;
 
-  const _SettingsItem({required this.icon, required this.label, this.trailing, this.onTap, this.color});
+  const _SettingsItem(
+      {required this.icon,
+      required this.label,
+      this.trailing,
+      this.onTap,
+      this.color});
 }

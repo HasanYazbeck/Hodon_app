@@ -89,6 +89,13 @@ class AppUser {
 
   String get firstName => fullName.split(' ').first;
 
+  bool get hasValidGeolocation {
+    final addr = address;
+    if (addr == null) return false;
+    // (0,0) is used as a fallback placeholder and is not a usable location.
+    return !(addr.latitude == 0 && addr.longitude == 0);
+  }
+
   factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
         id: json['id'] as String,
         email: json['email'] as String,

@@ -9,6 +9,7 @@ class SecureStorageService {
   static const _keyRefreshToken = 'refresh_token';
   static const _keyUserId = 'user_id';
   static const _keyUserRole = 'user_role';
+  static const _parentBookingTermsPrefix = 'parent_booking_terms_accepted_';
 
   Future<void> saveTokens({
     required String accessToken,
@@ -31,6 +32,16 @@ class SecureStorageService {
       _storage.write(key: _keyUserRole, value: role);
   Future<String?> getUserRole() => _storage.read(key: _keyUserRole);
 
+  Future<bool> hasAcceptedParentBookingTerms(String userId) async {
+    final value = await _storage.read(key: '$_parentBookingTermsPrefix$userId');
+    return value == 'true';
+  }
+
+  Future<void> acceptParentBookingTerms(String userId) {
+    return _storage.write(
+        key: '$_parentBookingTermsPrefix$userId', value: 'true');
+  }
+
   Future<bool> isLoggedIn() async {
     final token = await getAccessToken();
     return token != null && token.isNotEmpty;
@@ -38,4 +49,3 @@ class SecureStorageService {
 
   Future<void> clearAll() => _storage.deleteAll();
 }
-

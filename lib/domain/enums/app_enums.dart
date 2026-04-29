@@ -24,6 +24,35 @@ extension ServiceTypeX on ServiceType {
       };
 }
 
+enum CareLocationType {
+  parentHomeVisit,
+  parentPickupFromSitter,
+  sitterHomeHosting,
+}
+
+extension CareLocationTypeX on CareLocationType {
+  String get label => switch (this) {
+        CareLocationType.parentHomeVisit => 'Go to parent home',
+        CareLocationType.parentPickupFromSitter => 'Parent picks up from sitter',
+        CareLocationType.sitterHomeHosting => 'Host at sitter home',
+      };
+
+  String get description => switch (this) {
+        CareLocationType.parentHomeVisit =>
+          'You travel to the parent home to provide care.',
+        CareLocationType.parentPickupFromSitter =>
+          'The parent arranges pickup from your location before the booking.',
+        CareLocationType.sitterHomeHosting =>
+          'Children stay at your home during the booking.',
+      };
+
+  bool get requiresTransportFee => switch (this) {
+        CareLocationType.parentHomeVisit => true,
+        CareLocationType.parentPickupFromSitter => true,
+        CareLocationType.sitterHomeHosting => false,
+      };
+}
+
 enum ChildAgeGroup { baby, toddler, preschool, gradeschooler }
 
 extension ChildAgeGroupX on ChildAgeGroup {

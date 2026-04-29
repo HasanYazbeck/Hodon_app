@@ -37,9 +37,18 @@ class BookingListScreen extends ConsumerWidget {
           error: (e, _) => Center(child: Text(e.toString())),
           data: (bookings) => TabBarView(
             children: [
-              _BookingTab(bookings: bookings.where((b) => b.status == BookingStatus.pending || b.status == BookingStatus.accepted || b.status == BookingStatus.parentConfirmed).toList()),
-              _BookingTab(bookings: bookings.where((b) => b.status.isActive).toList()),
-              _BookingTab(bookings: bookings.where((b) => b.status.isPast).toList(), isPast: true),
+              _BookingTab(
+                  bookings: bookings
+                      .where((b) =>
+                          b.status == BookingStatus.pending ||
+                          b.status == BookingStatus.accepted ||
+                          b.status == BookingStatus.parentConfirmed)
+                      .toList()),
+              _BookingTab(
+                  bookings: bookings.where((b) => b.status.isActive).toList()),
+              _BookingTab(
+                  bookings: bookings.where((b) => b.status.isPast).toList(),
+                  isPast: true),
             ],
           ),
         ),
@@ -60,7 +69,9 @@ class _BookingTab extends StatelessWidget {
       return EmptyState(
         icon: Icons.calendar_today_rounded,
         title: isPast ? 'No past bookings' : 'No upcoming bookings',
-        subtitle: isPast ? 'Your booking history will appear here' : 'Book a sitter to get started',
+        subtitle: isPast
+            ? 'Your booking history will appear here'
+            : 'Book a sitter to get started',
       );
     }
     return ListView.separated(
@@ -101,11 +112,16 @@ class _BookingListItem extends StatelessWidget {
                     Text(booking.sitterUser?.fullName ?? 'Babysitter',
                         style: Theme.of(context).textTheme.titleSmall),
                     Text(booking.serviceType.label,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryTextColor)),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: secondaryTextColor)),
                   ],
                 ),
               ),
-               StatusChip(label: booking.status.label, color: _statusColor(booking.status)),
+              StatusChip(
+                  label: booking.status.label,
+                  color: _statusColor(booking.status)),
             ],
           ),
           const SizedBox(height: AppSizes.sm),
@@ -113,11 +129,15 @@ class _BookingListItem extends StatelessWidget {
             children: [
               Icon(Icons.schedule_rounded, size: 14, color: hintColor),
               const SizedBox(width: 4),
-              Text(_fmtDate(booking.startDatetime), style: Theme.of(context).textTheme.bodySmall),
+              Text(_fmtDate(booking.startDatetime),
+                  style: Theme.of(context).textTheme.bodySmall),
               const Spacer(),
               Text(
                 '\$${booking.pricing.total.toStringAsFixed(0)}',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.primary),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(color: AppColors.primary),
               ),
             ],
           ),
@@ -129,13 +149,30 @@ class _BookingListItem extends StatelessWidget {
   Color _statusColor(BookingStatus s) {
     if (s.isActive) return AppColors.success;
     if (s == BookingStatus.pending) return AppColors.warning;
-    if (s.isPast && s != BookingStatus.completed && s != BookingStatus.rated) return Colors.grey;
-    if (s == BookingStatus.completed || s == BookingStatus.rated) return AppColors.success;
+    if (s.isPast && s != BookingStatus.completed && s != BookingStatus.rated) {
+      return Colors.grey;
+    }
+    if (s == BookingStatus.completed || s == BookingStatus.rated) {
+      return AppColors.success;
+    }
     return AppColors.primary;
   }
 
   String _fmtDate(DateTime dt) {
-    final months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
     final ampm = dt.hour >= 12 ? 'PM' : 'AM';
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year} · $h:${dt.minute.toString().padLeft(2, '0')} $ampm';
@@ -151,11 +188,14 @@ class BookingDetailScreen extends ConsumerWidget {
     final bookingsAsync = ref.watch(parentBookingsProvider);
 
     return bookingsAsync.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(body: Center(child: Text(e.toString()))),
       data: (bookings) {
         final booking = bookings.where((b) => b.id == bookingId).firstOrNull;
-        if (booking == null) return const Scaffold(body: Center(child: Text('Booking not found')));
+        if (booking == null) {
+          return const Scaffold(body: Center(child: Text('Booking not found')));
+        }
         return _BookingDetailView(booking: booking);
       },
     );
@@ -200,9 +240,14 @@ class _BookingDetailView extends ConsumerWidget {
                 ),
                 child: Column(
                   children: [
-                    Text(booking.status.label, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.primary)),
+                    Text(booking.status.label,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(color: AppColors.primary)),
                     const SizedBox(height: 4),
-                    Text('Booking #${booking.id.substring(0, 8)}', style: Theme.of(context).textTheme.bodySmall),
+                    Text('Booking #${booking.id.substring(0, 8)}',
+                        style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
               ),
@@ -213,17 +258,24 @@ class _BookingDetailView extends ConsumerWidget {
                 title: 'Babysitter',
                 child: Row(
                   children: [
-                    UserAvatar(imageUrl: booking.sitterUser?.avatarUrl, name: booking.sitterUser?.fullName, size: 52),
+                    UserAvatar(
+                        imageUrl: booking.sitterUser?.avatarUrl,
+                        name: booking.sitterUser?.fullName,
+                        size: 52),
                     const SizedBox(width: AppSizes.md),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(booking.sitterUser?.fullName ?? 'Sitter', style: Theme.of(context).textTheme.titleMedium),
+                        Text(booking.sitterUser?.fullName ?? 'Sitter',
+                            style: Theme.of(context).textTheme.titleMedium),
                         TextButton.icon(
-                          onPressed: () => context.go('/chat/conv_${booking.sitterId}'),
-                          icon: const Icon(Icons.chat_bubble_outline_rounded, size: 14),
+                          onPressed: () =>
+                              context.go('/chat/conv_${booking.sitterId}'),
+                          icon: const Icon(Icons.chat_bubble_outline_rounded,
+                              size: 14),
                           label: const Text('Message'),
-                          style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                          style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero, minimumSize: Size.zero),
                         ),
                       ],
                     ),
@@ -237,8 +289,10 @@ class _BookingDetailView extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _InfoRow(Icons.calendar_today_rounded, _fmtDate(booking.startDatetime)),
-                    _InfoRow(Icons.schedule_rounded, '${booking.durationHours.toStringAsFixed(1)} hours'),
+                    _InfoRow(Icons.calendar_today_rounded,
+                        _fmtDate(booking.startDatetime)),
+                    _InfoRow(Icons.schedule_rounded,
+                        '${booking.durationHours.toStringAsFixed(1)} hours'),
                   ],
                 ),
               ),
@@ -246,7 +300,18 @@ class _BookingDetailView extends ConsumerWidget {
               // Location
               _DetailSection(
                 title: 'Location',
-                child: _InfoRow(Icons.location_on_rounded, booking.location.fullAddress),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _InfoRow(
+                        Icons.location_on_rounded, booking.location.fullAddress),
+                    const SizedBox(height: AppSizes.sm),
+                    _InfoRow(
+                      Icons.swap_horiz_rounded,
+                      booking.careLocationType.label,
+                    ),
+                  ],
+                ),
               ),
 
               // Pricing
@@ -254,18 +319,39 @@ class _BookingDetailView extends ConsumerWidget {
                 title: 'Payment Summary',
                 child: Column(
                   children: [
-                    _PriceRow('Subtotal', '\$${booking.pricing.subtotal.toStringAsFixed(2)}'),
-                    _PriceRow('Platform Fee', '\$${booking.pricing.platformCommission.toStringAsFixed(2)}'),
+                    _PriceRow('Subtotal',
+                        '\$${booking.pricing.subtotal.toStringAsFixed(2)}'),
+                    _PriceRow('Platform Fee',
+                        '\$${booking.pricing.platformCommission.toStringAsFixed(2)}'),
+                    if (booking.pricing.transportFee > 0)
+                      _PriceRow('Transport Fee',
+                          '\$${booking.pricing.transportFee.toStringAsFixed(2)}'),
                     if (booking.pricing.emergencyFee > 0)
-                      _PriceRow('Emergency Fee', '\$${booking.pricing.emergencyFee.toStringAsFixed(2)}', color: AppColors.emergency),
+                      _PriceRow('Emergency Fee',
+                          '\$${booking.pricing.emergencyFee.toStringAsFixed(2)}',
+                          color: AppColors.emergency),
                     const Divider(),
-                    _PriceRow('Total', '\$${booking.pricing.total.toStringAsFixed(2)}', isBold: true, color: AppColors.primary),
+                    _PriceRow('Total',
+                        '\$${booking.pricing.total.toStringAsFixed(2)}',
+                        isBold: true, color: AppColors.primary),
+                    if (booking.platformFeeDeductedOnCancellation) ...[
+                      _PriceRow(
+                        'Platform Fee Deducted',
+                        '-\$${booking.deductedPlatformFeeAmount.toStringAsFixed(2)}',
+                        color: AppColors.error,
+                      ),
+                      _PriceRow(
+                        'Refund Amount',
+                        '\$${_refundableAmount(booking).toStringAsFixed(2)}',
+                        color: AppColors.success,
+                      ),
+                    ],
                     _PriceRow('Payment', booking.pricing.paymentMethod.label),
                   ],
                 ),
               ),
 
-              if (booking.status.canCancel) ...[
+              if (booking.status.canCancelByParent) ...[
                 const SizedBox(height: AppSizes.lg),
                 OutlinedButton(
                   onPressed: actionState is AsyncLoading
@@ -274,11 +360,30 @@ class _BookingDetailView extends ConsumerWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
                     side: const BorderSide(color: AppColors.error),
-                    minimumSize: const Size(double.infinity, AppSizes.buttonHeight),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
+                    minimumSize:
+                        const Size(double.infinity, AppSizes.buttonHeight),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
                   ),
-                  child: const Text('Cancel Booking'),
+                  child: Text(
+                    booking.status
+                            .requiresPlatformFeeDeductionOnParentCancellation
+                        ? 'Cancel Booking (Platform Fee Deduction)'
+                        : 'Cancel Booking',
+                  ),
                 ),
+                if (booking.status
+                    .requiresPlatformFeeDeductionOnParentCancellation) ...[
+                  const SizedBox(height: AppSizes.sm),
+                  Text(
+                    'If you cancel after acceptance, the platform fee '
+                    '(\$${booking.pricing.platformCommission.toStringAsFixed(2)}) is deducted from the initial payment.',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: AppColors.error),
+                  ),
+                ],
               ],
               const SizedBox(height: AppSizes.xl),
             ],
@@ -295,7 +400,7 @@ class _BookingDetailView extends ConsumerWidget {
   Future<void> _showCancelDialog(BuildContext context, WidgetRef ref) async {
     final reason = await showDialog<String>(
       context: context,
-      builder: (_) => const _CancelDialog(),
+      builder: (_) => _CancelDialog(booking: booking),
     );
     if (reason != null) {
       await ref.read(bookingActionProvider.notifier).cancel(booking.id, reason);
@@ -304,15 +409,34 @@ class _BookingDetailView extends ConsumerWidget {
   }
 
   String _fmtDate(DateTime dt) {
-    final months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
     final ampm = dt.hour >= 12 ? 'PM' : 'AM';
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year} at $h:${dt.minute.toString().padLeft(2, '0')} $ampm';
   }
+
+  double _refundableAmount(Booking booking) {
+    final amount = booking.pricing.total - booking.deductedPlatformFeeAmount;
+    return amount < 0 ? 0 : amount;
+  }
 }
 
 class _CancelDialog extends StatefulWidget {
-  const _CancelDialog();
+  final Booking booking;
+  const _CancelDialog({required this.booking});
 
   @override
   State<_CancelDialog> createState() => _CancelDialogState();
@@ -322,20 +446,45 @@ class _CancelDialogState extends State<_CancelDialog> {
   final _ctrl = TextEditingController();
 
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => AlertDialog(
         title: const Text('Cancel Booking'),
-        content: TextField(
-          controller: _ctrl,
-          decoration: const InputDecoration(hintText: 'Reason for cancellation...'),
-          maxLines: 3,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.booking.status
+                .requiresPlatformFeeDeductionOnParentCancellation) ...[
+              Text(
+                'This booking is already accepted. Cancelling now deducts the platform fee '
+                '(\$${widget.booking.pricing.platformCommission.toStringAsFixed(2)}) from the initial payment.',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColors.error),
+              ),
+              const SizedBox(height: AppSizes.sm),
+            ],
+            TextField(
+              controller: _ctrl,
+              decoration:
+                  const InputDecoration(hintText: 'Reason for cancellation...'),
+              maxLines: 3,
+            ),
+          ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Keep Booking')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Keep Booking')),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, _ctrl.text.isEmpty ? 'Cancelled by parent' : _ctrl.text),
+            onPressed: () => Navigator.pop(context,
+                _ctrl.text.isEmpty ? 'Cancelled by parent' : _ctrl.text),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Cancel Booking'),
           ),
@@ -355,7 +504,11 @@ class _DetailSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: context.appTextSecondary)),
+              Text(title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelMedium
+                      ?.copyWith(color: context.appTextSecondary)),
               const SizedBox(height: AppSizes.sm),
               child,
             ],
@@ -376,7 +529,9 @@ class _InfoRow extends StatelessWidget {
           children: [
             Icon(icon, size: 16, color: context.appTextHint),
             const SizedBox(width: AppSizes.sm),
-            Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyMedium)),
+            Expanded(
+                child:
+                    Text(text, style: Theme.of(context).textTheme.bodyMedium)),
           ],
         ),
       );
@@ -395,8 +550,20 @@ class _PriceRow extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: isBold ? Theme.of(context).textTheme.titleSmall : Theme.of(context).textTheme.bodySmall?.copyWith(color: context.appTextSecondary)),
-            Text(value, style: (isBold ? Theme.of(context).textTheme.titleSmall : Theme.of(context).textTheme.bodySmall)?.copyWith(color: color, fontWeight: isBold ? FontWeight.w700 : null)),
+            Text(label,
+                style: isBold
+                    ? Theme.of(context).textTheme.titleSmall
+                    : Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: context.appTextSecondary)),
+            Text(value,
+                style: (isBold
+                        ? Theme.of(context).textTheme.titleSmall
+                        : Theme.of(context).textTheme.bodySmall)
+                    ?.copyWith(
+                        color: color,
+                        fontWeight: isBold ? FontWeight.w700 : null)),
           ],
         ),
       );

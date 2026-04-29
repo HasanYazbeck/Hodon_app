@@ -70,6 +70,11 @@ abstract class ISitterRepository {
 
   Future<SitterCard> getSitterDetail(String sitterId);
 
+  Future<SitterCard> updateSitterProfile({
+    required String sitterId,
+    required BabysitterProfile profile,
+  });
+
   Future<List<Review>> getSitterReviews(String sitterId);
 }
 

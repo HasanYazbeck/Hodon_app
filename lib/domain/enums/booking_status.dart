@@ -49,12 +49,24 @@ extension BookingStatusX on BookingStatus {
         BookingStatus.expired,
       ].contains(this);
 
-  bool get canCancel => [
+  bool get canCancelWithoutFee => [
         BookingStatus.pending,
         BookingStatus.notifyingTrustCircle,
         BookingStatus.notifyingSitterPool,
+      ].contains(this);
+
+  bool get requiresPlatformFeeDeductionOnParentCancellation => [
         BookingStatus.accepted,
         BookingStatus.parentConfirmed,
       ].contains(this);
-}
 
+  bool get canCancelByParent =>
+      canCancelWithoutFee || requiresPlatformFeeDeductionOnParentCancellation;
+
+  // Backward-compatible alias for older usages.
+  bool get requiresParentCancellationFee =>
+      requiresPlatformFeeDeductionOnParentCancellation;
+
+  // Backward-compatible alias used by existing screens.
+  bool get canCancel => canCancelByParent;
+}

@@ -85,6 +85,14 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     }
   }
 
+  void _handleBack() {
+    if (GoRouter.of(context).canPop()) {
+      context.pop();
+      return;
+    }
+    context.go('/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     final surfaceVariantColor = context.appSurfaceVariant;
@@ -107,7 +115,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
+          onPressed: _handleBack,
         ),
       ),
       body: SafeArea(
